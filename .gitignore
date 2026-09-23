@@ -1,0 +1,12 @@
+# Secrets & keys
+.env
+vapid_keys.json
+vapid_private.pem
+
+# Database
+*.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
