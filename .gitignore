@@ -16,3 +16,4 @@ installer/dist/
 installer/build/
 installer/*.msi
 installer/*.wixpdb
+.wix/
