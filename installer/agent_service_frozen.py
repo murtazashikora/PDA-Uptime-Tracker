@@ -7,7 +7,7 @@ on boot.
 
 This is a thin wrapper around the real agent logic — it resolves paths
 relative to the frozen exe so logging and config work correctly when
-running as a service from C:\Program Files\PDAUptimeAgent\.
+running as a service from C:\\Program Files\\PDAUptimeAgent\\.
 """
 
 import os
