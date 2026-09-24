@@ -127,19 +127,60 @@ The dashboard will be available at `http://localhost:5000`.
 
 ### Deploy agents
 
-On each monitored machine, edit the server IP in `agent.py`:
+There are two agent options:
+
+#### Option A: Simple script (`agent.py`)
+
+Edit the server IP in `agent.py` and run it manually or via Task Scheduler:
 
 ```python
 SERVER_IP = "your-server-ip"
 ```
 
-Then run:
-
 ```bash
 python agent.py
 ```
 
-The agent sends its hostname as the system identifier and authenticates via source IP (must match a known practice IP) or via `X-Agent-Token` header.
+#### Option B: Windows Service (`agent_service.py`) — Recommended
+
+Runs as a native Windows service that starts on boot, restarts on failure, and requires no logged-in user. Install from an **elevated (Administrator)** command prompt:
+
+```bash
+pip install pywin32 requests
+python -m pywin32_postinstall -install
+```
+
+Then install and start the service:
+
+```bash
+python agent_service.py install
+python agent_service.py start
+```
+
+The service appears in `services.msc` as **PDA Uptime Monitoring Agent** and starts automatically on boot.
+
+**Configuration** is via environment variables (set system-wide so the service can read them):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PDA_SERVER_URL` | `http://20.246.76.65:5000/heartbeat` | Server heartbeat endpoint |
+| `PDA_AGENT_TOKEN` | *(empty)* | Shared token for authentication |
+| `PDA_SYSTEM_NAME` | Machine hostname | Override the reported system name |
+| `PDA_IS_SERVER` | `0` | Set to `1` on servers (vs workstations) |
+| `PDA_HEARTBEAT_INTERVAL` | `30` | Seconds between heartbeats |
+| `PDA_LOG_DIR` | `C:\ProgramData\PDAUptimeAgent` | Log file location |
+
+**Service management:**
+
+```bash
+python agent_service.py stop      # stop the service
+python agent_service.py remove    # uninstall the service
+python agent_service.py debug     # run interactively for troubleshooting
+```
+
+Logs are written to `C:\ProgramData\PDAUptimeAgent\agent.log` (rotated at 2 MB, 3 backups).
+
+Both agents authenticate via source IP (must match a known practice IP) or via `X-Agent-Token` header.
 
 ## Agent Authentication
 
@@ -179,7 +220,8 @@ Instead of sending an email for every individual outage, the system uses a **dig
 ```
 PDA Uptime Tracker/
 ├── server.py          # Flask server, dashboard, Meraki integration (single file)
-├── agent.py           # Heartbeat agent (runs on monitored machines)
+├── agent.py           # Simple heartbeat agent (manual / Task Scheduler)
+├── agent_service.py   # Windows Service heartbeat agent (recommended)
 ├── .env               # Environment variables (not committed)
 ├── .gitignore
 └── README.md
