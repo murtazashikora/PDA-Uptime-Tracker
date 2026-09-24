@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  WiX v4 manifest for the PDA Uptime Agent MSI.
+
+  What this MSI does on install:
+    1. Copies PDAUptimeAgent.exe to C:\Program Files\PDAUptimeAgent\
+    2. Registers it as a Windows service (auto-start, LocalSystem)
+    3. Starts the service immediately
+    4. Sets recovery policy: restart on first, second, and subsequent failures
+
+  What it does on uninstall:
+    1. Stops and removes the Windows service
+    2. Deletes the install directory
+    (Logs in C:\ProgramData\PDAUptimeAgent\ are left behind intentionally.)
+
+  Build:  wix build pda_agent.wxs -o PDAUptimeAgent.msi -ext WixToolset.Util.wixext
+-->
+
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+
+  <Package Name="PDA Uptime Monitoring Agent"
+           Manufacturer="Piccadilly Dental Alliance"
+           Version="1.0.0.0"
+           UpgradeCode="A7F3C8B1-4D2E-4F6A-9B1C-3E5D7F8A2B4C"
+           Scope="perMachine">
+
+    <!-- Major upgrade: seamlessly replaces older versions -->
+    <MajorUpgrade DowngradeErrorMessage="A newer version is already installed." />
+
+    <Media Id="1" Cabinet="agent.cab" EmbedCab="yes" />
+
+    <!-- Install directory -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="PDAUptimeAgent" />
+    </StandardDirectory>
+
+    <!-- The agent executable -->
+    <ComponentGroup Id="AgentComponents" Directory="INSTALLFOLDER">
+      <Component Id="AgentExe" Guid="B2C4D6E8-1A3B-5C7D-9E0F-2A4B6C8D0E1F">
+        <File Id="PDAUptimeAgentExe"
+              Source="dist\PDAUptimeAgent.exe"
+              KeyPath="yes" />
+
+        <!-- Register as a Windows service -->
+        <ServiceInstall Id="InstallService"
+                        Name="PDAUptimeAgent"
+                        DisplayName="PDA Uptime Monitoring Agent"
+                        Description="Sends periodic heartbeats to the PESCOE Systems Uptime Dashboard so the IT team can monitor this machine's connectivity."
+                        Type="ownProcess"
+                        Start="auto"
+                        ErrorControl="normal"
+                        Account="LocalSystem" />
+
+        <!-- Start the service after install -->
+        <ServiceControl Id="StartService"
+                        Name="PDAUptimeAgent"
+                        Start="install"
+                        Stop="both"
+                        Remove="uninstall"
+                        Wait="yes" />
+
+        <!-- Recovery: restart on failure (1st, 2nd, and subsequent) -->
+        <util:ServiceConfig ServiceName="PDAUptimeAgent"
+                            FirstFailureActionType="restart"
+                            SecondFailureActionType="restart"
+                            ThirdFailureActionType="restart"
+                            RestartServiceDelayInSeconds="30"
+                            ResetPeriodInDays="1" />
+      </Component>
+
+      <!-- Create the log directory so the service has a place to write -->
+      <Component Id="LogDir" Guid="C3D5E7F9-2B4C-6D8E-0A1F-3B5C7D9E1A2B">
+        <CreateFolder />
+        <RegistryValue Root="HKLM"
+                       Key="Software\PDAUptimeAgent"
+                       Name="InstallDir"
+                       Type="string"
+                       Value="[INSTALLFOLDER]"
+                       KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <!-- Optional: set PDA_SERVER_URL at install time via msiexec property -->
+    <Property Id="PDA_SERVER_URL" Value="http://20.246.76.65:5000/heartbeat" />
+    <Property Id="PDA_AGENT_TOKEN" Value="" />
+    <Property Id="PDA_IS_SERVER" Value="0" />
+
+    <Component Id="EnvVars" Guid="D4E6F8A0-3C5D-7E9F-1B2A-4C6D8E0F2A3B" Directory="INSTALLFOLDER">
+      <Environment Id="EnvServerUrl"
+                   Name="PDA_SERVER_URL"
+                   Value="[PDA_SERVER_URL]"
+                   Permanent="no"
+                   Part="all"
+                   Action="set"
+                   System="yes" />
+      <Environment Id="EnvAgentToken"
+                   Name="PDA_AGENT_TOKEN"
+                   Value="[PDA_AGENT_TOKEN]"
+                   Permanent="no"
+                   Part="all"
+                   Action="set"
+                   System="yes" />
+      <Environment Id="EnvIsServer"
+                   Name="PDA_IS_SERVER"
+                   Value="[PDA_IS_SERVER]"
+                   Permanent="no"
+                   Part="all"
+                   Action="set"
+                   System="yes" />
+      <RegistryValue Root="HKLM"
+                     Key="Software\PDAUptimeAgent"
+                     Name="EnvVarsInstalled"
+                     Type="integer"
+                     Value="1"
+                     KeyPath="yes" />
+    </Component>
+
+    <Feature Id="MainFeature" Title="PDA Uptime Agent" Level="1">
+      <ComponentGroupRef Id="AgentComponents" />
+      <ComponentRef Id="EnvVars" />
+    </Feature>
+
+  </Package>
+</Wix>

@@ -180,6 +180,45 @@ python agent_service.py debug     # run interactively for troubleshooting
 
 Logs are written to `C:\ProgramData\PDAUptimeAgent\agent.log` (rotated at 2 MB, 3 backups).
 
+#### Option C: MSI Installer — Recommended for Bulk Deployment
+
+Build the MSI once and deploy it silently across all practice machines via Group Policy, Intune, or a remote management tool.
+
+**Build the MSI** (one-time, on a dev machine):
+
+```bash
+cd installer
+pip install pyinstaller pywin32 requests
+dotnet tool install --global wix
+wix extension add WixToolset.Util.wixext
+build_msi.bat
+```
+
+**Silent install** (no GUI, no reboot):
+
+```bash
+msiexec /i PDAUptimeAgent.msi /qn
+```
+
+**With custom server URL and token:**
+
+```bash
+msiexec /i PDAUptimeAgent.msi /qn PDA_SERVER_URL=http://your-server:5000/heartbeat PDA_AGENT_TOKEN=your-token
+```
+
+The MSI:
+- Installs `PDAUptimeAgent.exe` to `C:\Program Files\PDAUptimeAgent\`
+- Registers and starts a Windows service (auto-start, LocalSystem)
+- Sets service recovery to restart on failure (30-second delay)
+- Sets `PDA_SERVER_URL`, `PDA_AGENT_TOKEN`, and `PDA_IS_SERVER` as system environment variables
+- Supports major upgrades — deploying a newer MSI cleanly replaces the old version
+
+**Silent uninstall:**
+
+```bash
+msiexec /x PDAUptimeAgent.msi /qn
+```
+
 Both agents authenticate via source IP (must match a known practice IP) or via `X-Agent-Token` header.
 
 ## Agent Authentication
@@ -219,10 +258,15 @@ Instead of sending an email for every individual outage, the system uses a **dig
 
 ```
 PDA Uptime Tracker/
-├── server.py          # Flask server, dashboard, Meraki integration (single file)
-├── agent.py           # Simple heartbeat agent (manual / Task Scheduler)
-├── agent_service.py   # Windows Service heartbeat agent (recommended)
-├── .env               # Environment variables (not committed)
+├── server.py                          # Flask server, dashboard, Meraki integration
+├── agent.py                           # Simple heartbeat agent (manual / Task Scheduler)
+├── agent_service.py                   # Windows Service heartbeat agent (recommended)
+├── installer/
+│   ├── agent_service_frozen.py        # Frozen entry point for PyInstaller
+│   ├── PDAUptimeAgent.spec            # PyInstaller build spec
+│   ├── pda_agent.wxs                  # WiX MSI manifest (service install + env vars)
+│   └── build_msi.bat                  # One-click build: PyInstaller → WiX → .msi
+├── .env                               # Environment variables (not committed)
 ├── .gitignore
 └── README.md
 ```

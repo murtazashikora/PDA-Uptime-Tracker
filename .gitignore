@@ -10,3 +10,9 @@ vapid_private.pem
 __pycache__/
 *.pyc
 *.pyo
+
+# Build artifacts
+installer/dist/
+installer/build/
+installer/*.msi
+installer/*.wixpdb
