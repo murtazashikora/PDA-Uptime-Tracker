@@ -25,7 +25,7 @@ Invoke-WebRequest -Uri $MsiUrl -OutFile $TempMsi -UseBasicParsing
 Write-Host "Installing on workstation..." -ForegroundColor Cyan
 $proc = Start-Process msiexec -ArgumentList @(
     "/i", $TempMsi, "/qn",
-    "PDA_SERVER_URL=http://182.156.143.144:5000/heartbeat",
+    "PDA_SERVER_URL=https://uptimetracker.withbytecycle.com/heartbeat",
     "PDA_AGENT_TOKEN=431f2a8fe5109152ab2c8a4c6d75473955d26c6a41fa4ac2",
     "PDA_IS_SERVER=0"
 ) -Wait -PassThru

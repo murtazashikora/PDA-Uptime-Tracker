@@ -163,7 +163,7 @@ The service appears in `services.msc` as **PDA Uptime Monitoring Agent** and sta
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `PDA_SERVER_URL` | `http://182.156.143.144:5000/heartbeat` | Server heartbeat endpoint |
+| `PDA_SERVER_URL` | `https://uptimetracker.withbytecycle.com/heartbeat` | Server heartbeat endpoint |
 | `PDA_AGENT_TOKEN` | *(empty)* | Shared token for authentication |
 | `PDA_SYSTEM_NAME` | Machine hostname | Override the reported system name |
 | `PDA_IS_SERVER` | `0` | Set to `1` on servers (vs workstations) |

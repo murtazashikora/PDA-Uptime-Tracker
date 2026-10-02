@@ -3,12 +3,11 @@ import requests
 import platform
 
 # --- CLIENT CONFIGURATION ---
-SERVER_IP = "182.156.143.144"  # 👈 CHANGE to your server's static IP address or URL
-SERVER_PORT = 5000
-HEARTBEAT_INTERVAL = 30      # Send pulse every 10 seconds
+HEARTBEAT_URL = "https://uptimetracker.withbytecycle.com/heartbeat"
+HEARTBEAT_INTERVAL = 30
 SYSTEM_NAME = platform.node()
 
-URL = f"http://{SERVER_IP}:{SERVER_PORT}/heartbeat"
+URL = HEARTBEAT_URL
 
 def send_pulse():
     payload = {"system_name": SYSTEM_NAME}
