@@ -2092,7 +2092,12 @@ th[data-key]:focus-visible{outline-offset:-2px;}
     </div>
     </div>
 {% raw %}
-    <div class="section-title"><span>Network · Meraki MX</span></div>
+    <div class="section-title collapse-head" id="merakiToggle" role="button" tabindex="0"
+         aria-expanded="true" aria-controls="merakiCollapsible" onclick="toggleSection('meraki')"
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSection('meraki');}">
+        <span><svg class="ico chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>Network · Meraki MX</span>
+        <span id="merakiHint" style="font-size:12px;font-weight:600;text-transform:none;color:var(--text-muted)">Hide</span></div>
+    <div id="merakiCollapsible">
     <section class="mrk" id="net-root">
 <div class="container" id="app">
   <div class="header">
@@ -2197,6 +2202,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
   </div>
 </div>
     </section>
+    </div>
 {% endraw %}</div>
 
 <script>
@@ -2294,6 +2300,8 @@ function setSection(name, collapsed){
     if(!c||!h) return;
     c.hidden=collapsed;
     h.setAttribute('aria-expanded', String(!collapsed));
+    const hint=document.getElementById(name+'Hint');
+    if(hint) hint.textContent = collapsed ? 'Show' : 'Hide';
 }
 function toggleSection(name){
     const collapsed = !document.getElementById(name+'Collapsible').hidden; // visible -> collapse
@@ -2564,6 +2572,7 @@ function diffAndNotify(rows){
     setSystemsCollapsed(_sysCol===null ? true : _sysCol==='1');   // default collapsed
     initSection('client', true);   // Summary defaults collapsed; the total
                                    // badges stay visible in the header
+    initSection('meraki', false);  // Meraki section defaults expanded
     setFilter(filter);
     refresh();
     setInterval(refresh, 30000);   // live poll every 30s
