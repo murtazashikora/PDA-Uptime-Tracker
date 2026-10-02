@@ -2069,6 +2069,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
             <button id="btnFilterAll" class="filter-pill active-pill" onclick="setFilter('all')">Show All</button>
             <button id="btnFilterWorkstations" class="filter-pill" onclick="setFilter('workstations')">Workstations Only</button>
             <button id="btnFilterServers" class="filter-pill" onclick="setFilter('servers')">Servers Only</button>
+            <button id="btnFilterVmServers" class="filter-pill" onclick="setFilter('vm_servers')">VM Servers</button>
             <button id="btnFilterOutages" class="filter-pill" style="border-color:rgba(239,68,68,.4)" onclick="setFilter('outages')"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Active Outages</button>
         </div>
     </div>
@@ -2207,8 +2208,9 @@ let sortKey = sessionStorage.getItem('sortKey') || 'business_group';
 let sortDir = sessionStorage.getItem('sortDir') || 'asc';
 
 function setFilter(f){ filter=f; sessionStorage.setItem('activeQuickFilter',f);
-    ['all','workstations','servers','outages'].forEach(k=>{
-        const b=document.getElementById('btnFilter'+k.charAt(0).toUpperCase()+k.slice(1));
+    ['all','workstations','servers','vm_servers','outages'].forEach(k=>{
+        const id='btnFilter'+k.split('_').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join('');
+        const b=document.getElementById(id);
         if(b) b.classList.toggle('active-pill', k===f);
     }); render(); }
 
@@ -2223,8 +2225,9 @@ function render(){
     let rows = DATA.filter(m=>{
         const hay = (m.system_name+' '+m.practice_name+' '+m.ip_address+' '+m.business_group).toLowerCase();
         if(q && !hay.includes(q)) return false;
-        if(filter==='workstations') return !m.is_server;
+        if(filter==='workstations') return !m.is_server && !m.system_name.toUpperCase().includes('VM-SVR');
         if(filter==='servers') return m.is_server;
+        if(filter==='vm_servers') return m.system_name.toUpperCase().includes('VM-SVR');
         if(filter==='outages') return m.status==='Offline';
         return true;
     });
