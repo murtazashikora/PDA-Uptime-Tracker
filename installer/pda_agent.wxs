@@ -83,7 +83,7 @@
     </ComponentGroup>
 
     <!-- Optional: set PDA_SERVER_URL at install time via msiexec property -->
-    <Property Id="PDA_SERVER_URL" Value="http://20.246.76.65:5000/heartbeat" />
+    <Property Id="PDA_SERVER_URL" Value="http://182.156.143.144:5000/heartbeat" />
     <Property Id="PDA_AGENT_TOKEN" Secure="yes" />
     <Property Id="PDA_IS_SERVER" Value="0" />
 

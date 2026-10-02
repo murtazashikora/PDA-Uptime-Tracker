@@ -3,7 +3,7 @@ import requests
 import platform
 
 # --- CLIENT CONFIGURATION ---
-SERVER_IP = "20.246.76.65"  # 👈 CHANGE to your server's static IP address or URL
+SERVER_IP = "182.156.143.144"  # 👈 CHANGE to your server's static IP address or URL
 SERVER_PORT = 5000
 HEARTBEAT_INTERVAL = 30      # Send pulse every 10 seconds
 SYSTEM_NAME = platform.node()

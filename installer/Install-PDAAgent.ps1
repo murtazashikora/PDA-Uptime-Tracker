@@ -7,7 +7,7 @@
     or uninstalls the agent if -Uninstall is specified.
     Must be run as Administrator.
 .PARAMETER ServerUrl
-    The heartbeat endpoint URL. Default: http://20.246.76.65:5000/heartbeat
+    The heartbeat endpoint URL. Default: http://182.156.143.144:5000/heartbeat
 .PARAMETER AgentToken
     Shared authentication token. Optional.
 .PARAMETER IsServer
@@ -23,7 +23,7 @@
 #>
 
 param(
-    [string]$ServerUrl  = "http://20.246.76.65:5000/heartbeat",
+    [string]$ServerUrl  = "http://182.156.143.144:5000/heartbeat",
     [string]$AgentToken = "",
     [string]$IsServer   = "0",
     [switch]$Uninstall

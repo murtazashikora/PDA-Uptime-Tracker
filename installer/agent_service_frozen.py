@@ -30,7 +30,7 @@ import servicemanager
 # ---------------------------------------------------------------------------
 
 SERVER_URL = os.environ.get(
-    "PDA_SERVER_URL", "http://20.246.76.65:5000/heartbeat"
+    "PDA_SERVER_URL", "http://182.156.143.144:5000/heartbeat"
 )
 AGENT_TOKEN = os.environ.get("PDA_AGENT_TOKEN", "")
 SYSTEM_NAME = os.environ.get("PDA_SYSTEM_NAME", platform.node())
