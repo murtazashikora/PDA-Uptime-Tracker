@@ -1512,19 +1512,88 @@ _PWA_HEAD = """
 LOGIN_TEMPLATE = """
 <!DOCTYPE html><html lang="en"><head><title>PESCOE Systems Uptime Dashboard</title>
 """ + _PWA_HEAD + """
-<style>""" + _SHARED_CSS + """</style></head><body>
-<div class="login-card">
-    <h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>PESCOE Systems Uptime Dashboard</span></h2>
-    {% if error %}<div class="error-msg">{{ error }}</div>{% endif %}
-    <form method="POST" action="/login">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <div class="form-group"><label>Username</label>
-            <input type="text" name="username" required autocomplete="off"></div>
-        <div class="form-group"><label>Password</label>
-            <input type="password" name="password" required></div>
-        <button type="submit">Access Dashboard</button>
-    </form>
-</div></body></html>
+<style>""" + _SHARED_CSS + """
+    body{overflow:hidden;}
+
+    /* ── Splash screen ─────────────────────────────── */
+    .splash{position:fixed;inset:0;z-index:9999;background:var(--bg-color);
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            opacity:1;transition:opacity .6s ease;}
+    .splash.hide{opacity:0;pointer-events:none;}
+    .splash-logo{width:120px;height:120px;object-fit:contain;
+                 animation:splashPulse 1.2s ease-in-out infinite alternate;}
+    .splash-title{margin-top:24px;font-size:20px;font-weight:700;letter-spacing:1px;
+                  color:var(--text-main);opacity:0;animation:splashFadeUp .8s .4s ease forwards;}
+    .splash-sub{margin-top:8px;font-size:13px;color:var(--text-muted);letter-spacing:2px;
+                text-transform:uppercase;opacity:0;animation:splashFadeUp .8s .7s ease forwards;}
+    .splash-bar{width:180px;height:3px;background:var(--border-color);border-radius:3px;
+                margin-top:32px;overflow:hidden;opacity:0;animation:splashFadeUp .5s .9s ease forwards;}
+    .splash-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple,#a855f7));
+                     border-radius:3px;animation:splashLoad 1.4s 1s ease-in-out forwards;}
+
+    @keyframes splashPulse{0%{transform:scale(.92);opacity:.7}100%{transform:scale(1);opacity:1}}
+    @keyframes splashFadeUp{to{opacity:1;transform:translateY(0)}}
+    @keyframes splashLoad{to{width:100%}}
+
+    /* ── Hero login ────────────────────────────────── */
+    body.ready{overflow:auto;}
+    .login-hero{opacity:0;transform:translateY(30px);transition:opacity .6s .1s ease,transform .6s .1s ease;}
+    .login-hero.show{opacity:1;transform:translateY(0);}
+
+    .login-hero{display:flex;flex-direction:column;align-items:center;width:100%;max-width:420px;}
+    .hero-logo-wrap{margin-bottom:28px;text-align:center;}
+    .hero-logo-wrap img{width:90px;height:90px;object-fit:contain;
+                        filter:drop-shadow(0 0 20px rgba(59,130,246,.25));}
+    .hero-brand{font-size:22px;font-weight:700;margin-top:12px;letter-spacing:.5px;}
+    .hero-tagline{font-size:12px;color:var(--text-muted);text-transform:uppercase;
+                  letter-spacing:3px;margin-top:6px;}
+
+    .login-card{animation:none;} /* override if any */
+    .login-card h2{font-size:16px;margin-bottom:20px;color:var(--text-muted);font-weight:600;}
+</style></head><body>
+
+<!-- Splash -->
+<div class="splash" id="splash">
+    <img class="splash-logo" src="__LOGO_SRC__" alt="">
+    <div class="splash-title">PESCOE Systems</div>
+    <div class="splash-sub">Uptime Dashboard</div>
+    <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+</div>
+
+<!-- Hero login -->
+<div class="login-hero" id="loginHero">
+    <div class="hero-logo-wrap">
+        <img src="__LOGO_SRC__" alt="Piccadilly Dental Alliance">
+        <div class="hero-brand">PESCOE Systems</div>
+        <div class="hero-tagline">Uptime Dashboard</div>
+    </div>
+    <div class="login-card">
+        <h2>Sign in to continue</h2>
+        {% if error %}<div class="error-msg">{{ error }}</div>{% endif %}
+        <form method="POST" action="/login">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="form-group"><label>Username</label>
+                <input type="text" name="username" required autocomplete="off"></div>
+            <div class="form-group"><label>Password</label>
+                <input type="password" name="password" required></div>
+            <button type="submit">Access Dashboard</button>
+        </form>
+    </div>
+</div>
+
+<script>
+(function(){
+    var splash=document.getElementById('splash');
+    var hero=document.getElementById('loginHero');
+    setTimeout(function(){
+        splash.classList.add('hide');
+        document.body.classList.add('ready');
+        hero.classList.add('show');
+    }, 2600);
+    splash.addEventListener('transitionend',function(){splash.style.display='none';});
+})();
+</script>
+</body></html>
 """
 
 OTP_TEMPLATE = """
@@ -3094,10 +3163,12 @@ if (document.readyState === 'loading') {
 """
 
 # Embed the PDA logo (or hide the <img> tags if no logo file is present).
-if LOGO_DATA_URI:
-    DASHBOARD_TEMPLATE = DASHBOARD_TEMPLATE.replace("__LOGO_SRC__", LOGO_DATA_URI)
-else:
-    DASHBOARD_TEMPLATE = DASHBOARD_TEMPLATE.replace('<img src="__LOGO_SRC__"', '<img alt="" hidden src="#"')
+for _tpl_name in ("DASHBOARD_TEMPLATE", "LOGIN_TEMPLATE"):
+    _tpl = globals()[_tpl_name]
+    if LOGO_DATA_URI:
+        globals()[_tpl_name] = _tpl.replace("__LOGO_SRC__", LOGO_DATA_URI)
+    else:
+        globals()[_tpl_name] = _tpl.replace('<img src="__LOGO_SRC__"', '<img alt="" hidden src="#"')
 
 # ---------------------------------------------------------------------------
 # ROUTES
