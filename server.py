@@ -1515,25 +1515,55 @@ LOGIN_TEMPLATE = """
 <style>""" + _SHARED_CSS + """
     body{overflow:hidden;}
 
-    /* ── Splash screen ─────────────────────────────── */
+    /* ── Splash: Network Nodes ─────────────────────── */
     .splash{position:fixed;inset:0;z-index:9999;background:var(--bg-color);
             display:flex;flex-direction:column;align-items:center;justify-content:center;
-            opacity:1;transition:opacity .6s ease;}
+            opacity:1;transition:opacity .8s ease;}
     .splash.hide{opacity:0;pointer-events:none;}
-    .splash-logo{width:120px;height:120px;object-fit:contain;
-                 animation:splashPulse 1.2s ease-in-out infinite alternate;}
-    .splash-title{margin-top:24px;font-size:20px;font-weight:700;letter-spacing:1px;
-                  color:var(--text-main);opacity:0;animation:splashFadeUp .8s .4s ease forwards;}
-    .splash-sub{margin-top:8px;font-size:13px;color:var(--text-muted);letter-spacing:2px;
-                text-transform:uppercase;opacity:0;animation:splashFadeUp .8s .7s ease forwards;}
-    .splash-bar{width:180px;height:3px;background:var(--border-color);border-radius:3px;
-                margin-top:32px;overflow:hidden;opacity:0;animation:splashFadeUp .5s .9s ease forwards;}
-    .splash-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple,#a855f7));
-                     border-radius:3px;animation:splashLoad 1.4s 1s ease-in-out forwards;}
 
-    @keyframes splashPulse{0%{transform:scale(.92);opacity:.7}100%{transform:scale(1);opacity:1}}
+    .net-svg{width:min(420px,90vw);height:auto;}
+    .net-line{stroke:var(--accent-blue);stroke-width:1.2;stroke-dasharray:200;
+              stroke-dashoffset:200;opacity:0.5;filter:drop-shadow(0 0 3px rgba(59,130,246,.3));}
+    .net-node{fill:var(--accent-blue);opacity:0;filter:drop-shadow(0 0 4px rgba(59,130,246,.5));}
+    .net-hub{fill:#1e3a5f;stroke:var(--accent-blue);stroke-width:2.5;opacity:0;
+             filter:drop-shadow(0 0 12px rgba(59,130,246,.4));}
+    .net-hub-text{fill:var(--text-main);font-size:16px;font-weight:800;opacity:0;}
+    .net-hub-logo{opacity:0;}
+
+    @keyframes netLineDraw{to{stroke-dashoffset:0}}
+    @keyframes netNodePop{0%{r:0;opacity:0}60%{r:5;opacity:1}100%{r:4;opacity:0.9}}
+    @keyframes netHubGrow{0%{r:0;opacity:0}50%{r:42;opacity:1}100%{r:40;opacity:1}}
+    @keyframes netHubText{0%,60%{opacity:0}100%{opacity:1}}
+    @keyframes netNodePulse{0%,100%{opacity:0.6;r:4}50%{opacity:1;r:5}}
     @keyframes splashFadeUp{to{opacity:1;transform:translateY(0)}}
     @keyframes splashLoad{to{width:100%}}
+
+    .nl{animation:netLineDraw 1s ease forwards}
+    .nn{animation:netNodePop .5s ease forwards,netNodePulse 2s ease infinite}
+    .nh{animation:netHubGrow 1s ease forwards}
+    .nht{animation:netHubText .8s ease forwards}
+    .nhl{animation:netHubText .6s ease forwards}
+    .d1{animation-delay:.2s,.2s}.d2{animation-delay:.3s,.3s}.d3{animation-delay:.35s,.35s}
+    .d4{animation-delay:.4s,.4s}.d5{animation-delay:.45s,.45s}.d6{animation-delay:.5s,.5s}
+    .d7{animation-delay:.55s,.55s}.d8{animation-delay:.6s,.6s}.d9{animation-delay:.65s,.65s}
+    .d10{animation-delay:.7s,.7s}
+    .nd1{animation-delay:.6s,2s}.nd2{animation-delay:.65s,2.1s}.nd3{animation-delay:.7s,2.2s}
+    .nd4{animation-delay:.75s,2.3s}.nd5{animation-delay:.8s,2.4s}.nd6{animation-delay:.85s,2.15s}
+    .nd7{animation-delay:.72s,2.05s}.nd8{animation-delay:.78s,2.25s}.nd9{animation-delay:.88s,2.35s}
+    .nd10{animation-delay:.95s,2.45s}
+    .nh{animation-delay:1.2s}
+    .nht{animation-delay:1.8s}
+    .nhl{animation-delay:2s}
+
+    .splash-title{margin-top:10px;font-size:22px;font-weight:700;letter-spacing:1px;
+                  color:var(--text-main);opacity:0;animation:splashFadeUp .8s 3s ease forwards;}
+    .splash-sub{margin-top:6px;font-size:12px;color:var(--text-muted);letter-spacing:4px;
+                text-transform:uppercase;opacity:0;animation:splashFadeUp .8s 3.4s ease forwards;}
+    .splash-bar{width:200px;height:3px;background:var(--border-color);border-radius:3px;
+                margin-top:24px;overflow:hidden;opacity:0;animation:splashFadeUp .5s 3.7s ease forwards;}
+    .splash-bar-fill{height:100%;width:0;
+                     background:linear-gradient(90deg,#3b82f6,#10b981);
+                     border-radius:3px;animation:splashLoad 1.5s 3.9s ease-in-out forwards;}
 
     /* ── Hero login ────────────────────────────────── */
     body.ready{overflow:auto;}
@@ -1548,13 +1578,55 @@ LOGIN_TEMPLATE = """
     .hero-tagline{font-size:12px;color:var(--text-muted);text-transform:uppercase;
                   letter-spacing:3px;margin-top:6px;}
 
-    .login-card{animation:none;} /* override if any */
+    .login-card{animation:none;}
     .login-card h2{font-size:16px;margin-bottom:20px;color:var(--text-muted);font-weight:600;}
-</style></head><body>
+</style>
+<style id="splashMotion">
+    @media (prefers-reduced-motion:reduce){
+        .splash,.splash *,.login-hero{animation:initial!important;transition:initial!important;}
+        .nl{animation:netLineDraw 1s ease forwards!important}
+        .nn{animation:netNodePop .5s ease forwards,netNodePulse 2s ease infinite!important}
+        .nh{animation:netHubGrow 1s ease forwards!important}
+        .nht{animation:netHubText .8s ease forwards!important}
+        .nhl{animation:netHubText .6s ease forwards!important}
+        .splash-title{animation:splashFadeUp .8s 3s ease forwards!important}
+        .splash-sub{animation:splashFadeUp .8s 3.4s ease forwards!important}
+        .splash-bar{animation:splashFadeUp .5s 3.7s ease forwards!important}
+        .splash-bar-fill{animation:splashLoad 1.5s 3.9s ease-in-out forwards!important}
+        .splash{transition:opacity .8s ease!important}
+        .login-hero{transition:opacity .6s .1s ease,transform .6s .1s ease!important}
+    }
+</style>
+</head><body>
 
 <!-- Splash -->
 <div class="splash" id="splash">
-    <img class="splash-logo" src="__LOGO_SRC__" alt="">
+    <svg class="net-svg" viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg">
+        <line class="net-line nl d1"  x1="60"  y1="50"  x2="210" y2="130"/>
+        <line class="net-line nl d4"  x1="360" y1="45"  x2="210" y2="130"/>
+        <line class="net-line nl d6"  x1="40"  y1="200" x2="210" y2="130"/>
+        <line class="net-line nl d10" x1="380" y1="210" x2="210" y2="130"/>
+        <line class="net-line nl d2"  x1="30"  y1="130" x2="210" y2="130"/>
+        <line class="net-line nl d8"  x1="390" y1="130" x2="210" y2="130"/>
+        <line class="net-line nl d3"  x1="140" y1="30"  x2="210" y2="130"/>
+        <line class="net-line nl d5"  x1="290" y1="25"  x2="210" y2="130"/>
+        <line class="net-line nl d7"  x1="120" y1="230" x2="210" y2="130"/>
+        <line class="net-line nl d9"  x1="310" y1="235" x2="210" y2="130"/>
+        <circle class="net-node nn nd1"  cx="60"  cy="50"/>
+        <circle class="net-node nn nd2"  cx="360" cy="45"/>
+        <circle class="net-node nn nd3"  cx="40"  cy="200"/>
+        <circle class="net-node nn nd4"  cx="380" cy="210"/>
+        <circle class="net-node nn nd5"  cx="30"  cy="130"/>
+        <circle class="net-node nn nd6"  cx="390" cy="130"/>
+        <circle class="net-node nn nd7"  cx="140" cy="30"/>
+        <circle class="net-node nn nd8"  cx="290" cy="25"/>
+        <circle class="net-node nn nd9"  cx="120" cy="230"/>
+        <circle class="net-node nn nd10" cx="310" cy="235"/>
+        <circle class="net-hub nh" cx="210" cy="130" r="0"/>
+        <image class="net-hub-logo nht" href="__LOGO_SRC__" x="182" y="102" width="56" height="56"/>
+        <text class="net-hub-text nhl" x="210" y="172" text-anchor="middle" font-size="11"
+              letter-spacing="3">MONITORING</text>
+    </svg>
     <div class="splash-title">PESCOE Systems</div>
     <div class="splash-sub">Uptime Dashboard</div>
     <div class="splash-bar"><div class="splash-bar-fill"></div></div>
@@ -1589,7 +1661,7 @@ LOGIN_TEMPLATE = """
         splash.classList.add('hide');
         document.body.classList.add('ready');
         hero.classList.add('show');
-    }, 2600);
+    }, 6500);
     splash.addEventListener('transitionend',function(){splash.style.display='none';});
 })();
 </script>
@@ -2058,12 +2130,64 @@ th[data-key]:focus-visible{outline-offset:-2px;}
 .mrk .uplink-inline .uplink-head{display:flex;align-items:center;gap:8px;margin-bottom:var(--space-2);}
 .mrk .uplink-ip{font-family:var(--mono);font-size:10px;color:var(--muted);}
 {% endraw %}
+
+/* ── Terminal Boot overlay ─────────────────────── */
+.boot-overlay{position:fixed;inset:0;z-index:9999;background:#0a0e17;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    opacity:1;transition:opacity .8s ease;font-family:'Courier New',monospace;}
+.boot-overlay.hide{opacity:0;pointer-events:none;}
+.boot-terminal{width:min(500px,90vw);padding:24px;box-sizing:border-box;}
+.boot-line{font-size:13px;color:#10b981;white-space:nowrap;overflow:hidden;
+    display:block;margin:5px 0;width:0;opacity:0;}
+.boot-line.show{width:100%;opacity:1;transition:width .01s,opacity .01s;}
+.boot-prompt{color:#3b82f6;}
+.boot-ok{color:#10b981;}
+.boot-cursor{display:inline-block;width:8px;height:14px;background:#10b981;
+    vertical-align:middle;margin-left:3px;animation:bootBlink .7s step-end infinite;}
+@keyframes bootBlink{0%,100%{opacity:1}50%{opacity:0}}
+</style>
+<style>
+@media (prefers-reduced-motion:reduce){
+    .boot-overlay,.boot-overlay *{transition:revert!important;animation:revert!important;}
+    .boot-cursor{animation:bootBlink .7s step-end infinite!important;}
+}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Lexend:wght@300;400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script>const t=localStorage.getItem('theme')||'dark';if(t==='light')document.documentElement.setAttribute('data-theme','light');</script>
 </head><body>
+
+<!-- Terminal Boot -->
+<div class="boot-overlay" id="bootOverlay">
+    <div class="boot-terminal" id="bootTerminal">
+        <span class="boot-line" id="bl0"><span class="boot-prompt">$</span> initializing pescoe-uptime v2.1...</span>
+        <span class="boot-line" id="bl1"><span class="boot-ok">[✓]</span> database connected</span>
+        <span class="boot-line" id="bl2"><span class="boot-ok">[✓]</span> loading practice configurations</span>
+        <span class="boot-line" id="bl3"><span class="boot-ok">[✓]</span> 27 practices synchronized</span>
+        <span class="boot-line" id="bl4"><span class="boot-ok">[✓]</span> meraki api authenticated</span>
+        <span class="boot-line" id="bl5"><span class="boot-ok">[✓]</span> heartbeat monitor active</span>
+        <span class="boot-line" id="bl6"><span class="boot-ok">[✓]</span> email notifications ready</span>
+        <span class="boot-line" id="bl7"><span class="boot-prompt">$</span> launching dashboard...<span class="boot-cursor"></span></span>
+    </div>
+</div>
+<script>
+(function(){
+    var lines=document.querySelectorAll('.boot-line');
+    var delays=[300,600,400,500,400,350,400,500];
+    var t=200;
+    for(var i=0;i<lines.length;i++){
+        (function(el,d){setTimeout(function(){el.classList.add('show');},d);})(lines[i],t);
+        t+=delays[i]||400;
+    }
+    setTimeout(function(){
+        var ov=document.getElementById('bootOverlay');
+        ov.classList.add('hide');
+        ov.addEventListener('transitionend',function(){ov.style.display='none';});
+    },t+800);
+})();
+</script>
+
 <div class="container">
     <div id="srStatus" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
     <header>
@@ -3168,7 +3292,8 @@ for _tpl_name in ("DASHBOARD_TEMPLATE", "LOGIN_TEMPLATE"):
     if LOGO_DATA_URI:
         globals()[_tpl_name] = _tpl.replace("__LOGO_SRC__", LOGO_DATA_URI)
     else:
-        globals()[_tpl_name] = _tpl.replace('<img src="__LOGO_SRC__"', '<img alt="" hidden src="#"')
+        _tpl = _tpl.replace('<img src="__LOGO_SRC__"', '<img alt="" hidden src="#"')
+        globals()[_tpl_name] = _tpl.replace('href="__LOGO_SRC__"', 'href="#" visibility="hidden"')
 
 # ---------------------------------------------------------------------------
 # ROUTES
