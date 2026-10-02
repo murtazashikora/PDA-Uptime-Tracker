@@ -1292,7 +1292,10 @@ def login_required(f):
 def client_ip():
     """Resolve the client IP, honouring X-Forwarded-For only behind a trusted proxy."""
     if CONFIG["TRUST_PROXY"] and request.headers.get("X-Forwarded-For"):
-        return request.headers["X-Forwarded-For"].split(",")[0].strip()
+        ip = request.headers["X-Forwarded-For"].split(",")[0].strip()
+        if ":" in ip and not ip.startswith("["):
+            ip = ip.rsplit(":", 1)[0]
+        return ip
     return request.remote_addr
 
 
