@@ -1460,23 +1460,23 @@ def build_snapshot():
 
 _SHARED_CSS = """
     :root {
-        --bg-color:#0f172a; --card-bg:#1e293b; --text-main:#f8fafc; --text-muted:#94a3b8;
-        --border-color:#334155; --accent-blue:#3b82f6; --accent-hover:#2563eb;
-        --error-color:#ef4444; --success-color:#10b981;
+        --bg-color:#f1f5f9; --card-bg:#fff; --text-main:#0f172a; --text-muted:#64748b;
+        --border-color:#cbd5e1; --accent-blue:#2563eb; --accent-hover:#1d4ed8;
+        --error-color:#dc2626; --success-color:#059669;
     }
     body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:var(--bg-color);
-           color:var(--text-main); display:flex; justify-content:center; align-items:center;
-           height:100vh; margin:0; }
+           color:var(--text-main); display:flex; justify-content:center; align-items:flex-start;
+           min-height:100vh; margin:0; padding-top:40px; box-sizing:border-box; }
     .login-card { background:var(--card-bg); border:1px solid var(--border-color); padding:40px;
                   border-radius:12px; width:100%; max-width:400px;
-                  box-shadow:0 10px 25px -5px rgba(0,0,0,.3); }
+                  box-shadow:0 4px 20px -2px rgba(0,0,0,.08); }
     h2 { margin-top:0; font-size:22px; font-weight:600; margin-bottom:24px; text-align:center; }
     p.subtext { color:var(--text-muted); font-size:13px; text-align:center; margin:0 0 24px; }
     .form-group { margin-bottom:20px; }
     label { display:block; font-size:13px; color:var(--text-muted); margin-bottom:8px;
             text-transform:uppercase; letter-spacing:.5px; }
-    input[type=text],input[type=password] { width:100%; padding:12px; background:#0f172a;
-            border:1px solid var(--border-color); border-radius:6px; color:#fff; font-size:15px;
+    input[type=text],input[type=password] { width:100%; padding:12px; background:#fff;
+            border:1px solid var(--border-color); border-radius:6px; color:#0f172a; font-size:15px;
             box-sizing:border-box; transition:border-color .2s; }
     input:focus { outline:none; border-color:var(--accent-blue); }
     button { width:100%; padding:12px; background:var(--accent-blue); color:#fff; border:none;
@@ -1484,9 +1484,9 @@ _SHARED_CSS = """
     button:hover { background:var(--accent-hover); }
     .resend-btn { background:transparent; border:1px solid var(--border-color); margin-top:10px; color:var(--text-muted); }
     .resend-btn:hover { background:var(--border-color); color:var(--text-main); }
-    .error-msg { color:var(--error-color); background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.2);
+    .error-msg { color:var(--error-color); background:rgba(220,38,38,.06); border:1px solid rgba(220,38,38,.15);
                  padding:10px; border-radius:6px; font-size:14px; margin-bottom:20px; text-align:center; }
-    .info-msg { color:var(--success-color); background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.2);
+    .info-msg { color:var(--success-color); background:rgba(5,150,105,.06); border:1px solid rgba(5,150,105,.15);
                 padding:10px; border-radius:6px; font-size:14px; margin-bottom:20px; text-align:center; }
     h2 { display:flex; align-items:center; justify-content:center; gap:10px; }
     h2 .ico { width:22px; height:22px; flex:0 0 auto; }
@@ -1500,9 +1500,10 @@ _SHARED_CSS = """
 _PWA_HEAD = """
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#f1f5f9">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="PESCOE Uptime">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -1516,7 +1517,7 @@ LOGIN_TEMPLATE = """
     body{overflow:hidden;}
 
     /* ── Splash: Network Nodes ─────────────────────── */
-    .splash{position:fixed;inset:0;z-index:9999;background:var(--bg-color);
+    .splash{position:fixed;inset:0;z-index:9999;background:#f1f5f9;
             display:flex;flex-direction:column;align-items:center;justify-content:center;
             opacity:1;transition:opacity .8s ease;}
     .splash.hide{opacity:0;pointer-events:none;}
@@ -1525,14 +1526,13 @@ LOGIN_TEMPLATE = """
     .net-line{stroke:var(--accent-blue);stroke-width:1.2;stroke-dasharray:200;
               stroke-dashoffset:200;opacity:0.5;filter:drop-shadow(0 0 3px rgba(59,130,246,.3));}
     .net-node{fill:var(--accent-blue);opacity:0;filter:drop-shadow(0 0 4px rgba(59,130,246,.5));}
-    .net-hub{fill:#1e3a5f;stroke:var(--accent-blue);stroke-width:2.5;opacity:0;
-             filter:drop-shadow(0 0 12px rgba(59,130,246,.4));}
-    .net-hub-text{fill:var(--text-main);font-size:16px;font-weight:800;opacity:0;}
+    .net-hub{fill:#e0ecff;stroke:var(--accent-blue);stroke-width:2.5;opacity:0;
+             filter:drop-shadow(0 0 12px rgba(37,99,235,.3));}
     .net-hub-logo{opacity:0;}
 
     @keyframes netLineDraw{to{stroke-dashoffset:0}}
     @keyframes netNodePop{0%{r:0;opacity:0}60%{r:5;opacity:1}100%{r:4;opacity:0.9}}
-    @keyframes netHubGrow{0%{r:0;opacity:0}50%{r:42;opacity:1}100%{r:40;opacity:1}}
+    @keyframes netHubGrow{0%{r:0;opacity:0}50%{r:98;opacity:1}100%{r:96;opacity:1}}
     @keyframes netHubText{0%,60%{opacity:0}100%{opacity:1}}
     @keyframes netNodePulse{0%,100%{opacity:0.6;r:4}50%{opacity:1;r:5}}
     @keyframes splashFadeUp{to{opacity:1;transform:translateY(0)}}
@@ -1571,9 +1571,9 @@ LOGIN_TEMPLATE = """
     .login-hero.show{opacity:1;transform:translateY(0);}
 
     .login-hero{display:flex;flex-direction:column;align-items:center;width:100%;max-width:420px;}
-    .hero-logo-wrap{margin-bottom:28px;text-align:center;}
-    .hero-logo-wrap img{width:90px;height:90px;object-fit:contain;
-                        filter:drop-shadow(0 0 20px rgba(59,130,246,.25));}
+    .hero-logo-wrap{margin-bottom:16px;text-align:center;}
+    .hero-logo-wrap img{width:270px;height:270px;object-fit:contain;
+                        filter:drop-shadow(0 0 16px rgba(37,99,235,.15));}
     .hero-brand{font-size:22px;font-weight:700;margin-top:12px;letter-spacing:.5px;}
     .hero-tagline{font-size:12px;color:var(--text-muted);text-transform:uppercase;
                   letter-spacing:3px;margin-top:6px;}
@@ -1623,9 +1623,7 @@ LOGIN_TEMPLATE = """
         <circle class="net-node nn nd9"  cx="120" cy="230"/>
         <circle class="net-node nn nd10" cx="310" cy="235"/>
         <circle class="net-hub nh" cx="210" cy="130" r="0"/>
-        <image class="net-hub-logo nht" href="__LOGO_SRC__" x="182" y="102" width="56" height="56"/>
-        <text class="net-hub-text nhl" x="210" y="172" text-anchor="middle" font-size="11"
-              letter-spacing="3">MONITORING</text>
+        <image class="net-hub-logo nht" href="__LOGO_SRC__" x="138" y="58" width="144" height="144"/>
     </svg>
     <div class="splash-title">PESCOE Systems</div>
     <div class="splash-sub">Uptime Dashboard</div>
