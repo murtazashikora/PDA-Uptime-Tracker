@@ -1659,7 +1659,7 @@ LOGIN_TEMPLATE = """
         splash.classList.add('hide');
         document.body.classList.add('ready');
         hero.classList.add('show');
-    }, 6500);
+    }, 9000);
     splash.addEventListener('transitionend',function(){splash.style.display='none';});
 })();
 </script>
