@@ -60,6 +60,7 @@ import urllib.request
 from pathlib import Path
 from hashlib import sha256
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timezone, timedelta
 
 from flask import (
@@ -821,12 +822,17 @@ def uptime_ratio(conn, name, window_seconds, now_epoch):
 # EMAIL (single helper, async worker with retries)
 # ---------------------------------------------------------------------------
 
-def _send_email_now(subject, body, to_addr):
+def _send_email_now(subject, body, to_addr, html=None):
     """Blocking SMTP send. Returns True on success."""
     if not (CONFIG["SENDER_EMAIL"] and CONFIG["SMTP_PASSWORD"] and to_addr):
         print(f"[WARN] Email not sent (SMTP not fully configured): {subject}")
         return False
-    msg = MIMEText(body)
+    if html:
+        msg = MIMEMultipart("alternative")
+        msg.attach(MIMEText(body, "plain"))
+        msg.attach(MIMEText(html, "html"))
+    else:
+        msg = MIMEText(body)
     msg["Subject"] = subject
     msg["From"] = f'"{CONFIG["SENDER_NAME"]}" <{CONFIG["SENDER_EMAIL"]}>'
     msg["To"] = to_addr
@@ -844,11 +850,13 @@ def _send_email_now(subject, body, to_addr):
 def email_worker():
     """Consumes the email queue so alerts never block heartbeat handling."""
     while True:
-        subject, body, to_addr = email_queue.get()
+        item = email_queue.get()
+        subject, body, to_addr = item[0], item[1], item[2]
+        html = item[3] if len(item) > 3 else None
         for attempt in range(3):
-            if _send_email_now(subject, body, to_addr):
+            if _send_email_now(subject, body, to_addr, html=html):
                 break
-            time.sleep(2 * (attempt + 1))     # simple backoff
+            time.sleep(2 * (attempt + 1))
         else:
             print(f"[ERROR] Giving up on email after 3 attempts: {subject}")
         email_queue.task_done()
@@ -1144,6 +1152,52 @@ def _current_outages(now):
     return out
 
 
+def _digest_email_style():
+    return """
+    <style>
+      body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; }
+      .container { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+      .header { padding: 24px 28px; color: #fff; }
+      .header-top { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+      .header-logo { height: 40px; width: auto; border-radius: 6px; }
+      .header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+      .header p { margin: 6px 0 0; font-size: 13px; opacity: 0.85; }
+      .section { padding: 0 28px; }
+      .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; margin: 20px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #e5e7eb; }
+      .stats { display: flex; gap: 12px; padding: 16px 28px; }
+      .stat { flex: 1; text-align: center; background: #f9fafb; border-radius: 6px; padding: 12px 8px; }
+      .stat .num { font-size: 28px; font-weight: 700; }
+      .stat .label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.3px; }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      th { text-align: left; padding: 8px 10px; background: #f9fafb; color: #6b7280; font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; }
+      td { padding: 8px 10px; border-top: 1px solid #f0f0f0; }
+      .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+      .badge-down { background: #fef2f2; color: #dc2626; }
+      .badge-up { background: #f0fdf4; color: #16a34a; }
+      .badge-group { background: #eff6ff; color: #2563eb; }
+      .none-row td { color: #9ca3af; font-style: italic; }
+      .footer { padding: 16px 28px; text-align: center; font-size: 11px; color: #9ca3af; border-top: 1px solid #f0f0f0; margin-top: 16px; }
+    </style>"""
+
+
+def _event_rows_html(events, status_class):
+    if not events:
+        return '<tr class="none-row"><td colspan="5">None</td></tr>'
+    rows = ""
+    for e in events:
+        t = e["ts"].strftime('%I:%M:%S %p')
+        badge = "badge-down" if e["status"] == "Offline" else "badge-up"
+        downtime = f" ({e['downtime_str']})" if e["status"] == "Online" and e["downtime_str"] else ""
+        rows += f"""<tr>
+            <td><span class="badge badge-group">{e['group']}</span></td>
+            <td><strong>{e['practice']}</strong></td>
+            <td>{e['system_name']}</td>
+            <td>{e['node_type']}</td>
+            <td>{t}{downtime}</td>
+        </tr>"""
+    return rows
+
+
 def send_outage_digest():
     """
     Send a rolled-up digest of outages/recoveries since the last digest.
@@ -1157,38 +1211,77 @@ def send_outage_digest():
     went_down = [e for e in evs if e["status"] == "Offline"]
     came_back = [e for e in evs if e["status"] == "Online"]
 
-    # Nothing changed since the last digest — don't send anything.
     if not went_down and not came_back:
         return
 
     ongoing = _current_outages(now)
 
-    subject = (f"🚨 Outage Digest — {len(went_down)} new, {len(came_back)} resolved, "
+    subject = (f"\U0001f6a8 Outage Digest — {len(went_down)} new, {len(came_back)} resolved, "
                f"{len(ongoing)} ongoing ({now:%I:%M %p IST})")
 
-    lines = [
+    plain_lines = [
         f"Outage digest for the {CONFIG['DIGEST_INTERVAL_MIN']}-minute window "
         f"ending {now:%Y-%m-%d %I:%M:%S %p IST}",
-        "",
-        f"NEW OUTAGES ({len(went_down)}):",
+        f"New outages: {len(went_down)}, Resolved: {len(came_back)}, Still offline: {len(ongoing)}",
     ]
-    lines += [_fmt_event_line(e) for e in went_down] or ["  none"]
-    lines.append("")
+    for e in went_down:
+        plain_lines.append(f"  DOWN: [{e['group']}] {e['practice']} / {e['system_name']} at {e['ts'].strftime('%I:%M:%S %p')}")
+    for e in came_back:
+        plain_lines.append(f"  UP: [{e['group']}] {e['practice']} / {e['system_name']} at {e['ts'].strftime('%I:%M:%S %p')}")
+    for name, info, dur in ongoing:
+        practice, group, node_type = _node_label(name, info["ip_address"], info["is_server"])
+        plain_lines.append(f"  STILL DOWN: [{group}] {practice} / {name} — {dur}")
 
-    lines.append(f"RESOLVED IN THIS WINDOW ({len(came_back)}):")
-    lines += [_fmt_event_line(e) for e in came_back] or ["  none"]
-    lines.append("")
-
-    lines.append(f"STILL OFFLINE RIGHT NOW ({len(ongoing)}):")
+    ongoing_rows = ""
     if ongoing:
         for name, info, dur in ongoing:
             practice, group, node_type = _node_label(name, info["ip_address"], info["is_server"])
-            lines.append(f"  [{group}] {practice} / {name} "
-                         f"({node_type}, {info['ip_address']}) — down {dur}")
+            since = info["offline_since"].strftime('%I:%M:%S %p') if info["offline_since"] else "unknown"
+            ongoing_rows += f"""<tr>
+                <td><span class="badge badge-group">{group}</span></td>
+                <td><strong>{practice}</strong></td>
+                <td>{name}</td>
+                <td>{node_type}</td>
+                <td>{since}</td>
+                <td><span class="badge badge-down">{dur}</span></td>
+            </tr>"""
     else:
-        lines.append("  none")
+        ongoing_rows = '<tr class="none-row"><td colspan="6">All systems online</td></tr>'
 
-    email_queue.put((subject, "\n".join(lines), CONFIG["ALERT_RECEIVER_EMAIL"]))
+    html = f"""<!DOCTYPE html><html><head><meta charset="utf-8">{_digest_email_style()}</head><body>
+    <div class="container">
+        <div class="header" style="background: linear-gradient(135deg, #1e3a5f, #2563eb);">
+            <div class="header-top">{'<img class="header-logo" src="' + LOGO_DATA_URI + '" alt="PDA">' if LOGO_DATA_URI else ''}<h1>\U0001f6a8 Outage Digest</h1></div>
+            <p>{CONFIG['DIGEST_INTERVAL_MIN']}-minute window ending {now:%Y-%m-%d %I:%M:%S %p IST}</p>
+        </div>
+        <div class="stats">
+            <div class="stat"><div class="num" style="color:#dc2626;">{len(went_down)}</div><div class="label">New Outages</div></div>
+            <div class="stat"><div class="num" style="color:#16a34a;">{len(came_back)}</div><div class="label">Resolved</div></div>
+            <div class="stat"><div class="num" style="color:#d97706;">{len(ongoing)}</div><div class="label">Still Offline</div></div>
+        </div>
+        <div class="section">
+            <div class="section-title">\U0001f534 New Outages ({len(went_down)})</div>
+            <table><tr><th>Group</th><th>Site</th><th>System</th><th>Type</th><th>Time</th></tr>
+            {_event_rows_html(went_down, "badge-down")}
+            </table>
+        </div>
+        <div class="section">
+            <div class="section-title">✅ Resolved ({len(came_back)})</div>
+            <table><tr><th>Group</th><th>Site</th><th>System</th><th>Type</th><th>Time</th></tr>
+            {_event_rows_html(came_back, "badge-up")}
+            </table>
+        </div>
+        <div class="section">
+            <div class="section-title">⚠️ Still Offline ({len(ongoing)})</div>
+            <table><tr><th>Group</th><th>Site</th><th>System</th><th>Type</th><th>Since</th><th>Duration</th></tr>
+            {ongoing_rows}
+            </table>
+        </div>
+        <div class="footer">PDA/PESCOE Uptime Tracker &bull; Powered by PESCOE Systems</div>
+    </div>
+    </body></html>"""
+
+    email_queue.put((subject, "\n".join(plain_lines), CONFIG["ALERT_RECEIVER_EMAIL"], html))
 
 
 def send_eod_report():
@@ -1200,42 +1293,81 @@ def send_eod_report():
     with state_lock:
         evs = day_events[:]
         day_events.clear()
-        pending_events.clear()      # this report supersedes the interim buffer
+        pending_events.clear()
 
     ongoing = _current_outages(now)
     downs = [e for e in evs if e["status"] == "Offline"]
     ups = [e for e in evs if e["status"] == "Online"]
 
-    subject = (f"📋 End-of-Day Outage Summary — {now:%Y-%m-%d} — "
+    subject = (f"\U0001f4cb End-of-Day Outage Summary — {now:%Y-%m-%d} — "
                f"{len(downs)} outages, {len(ups)} resolved, {len(ongoing)} unresolved")
 
-    lines = [
+    plain_lines = [
         f"End-of-day outage summary for {now:%Y-%m-%d} (generated {now:%I:%M:%S %p IST})",
-        "",
-        f"Total outages detected today: {len(downs)}",
-        f"Total resolved today:         {len(ups)}",
-        f"Still unresolved:             {len(ongoing)}",
-        "",
-        "OUTAGES DETECTED TODAY:",
+        f"Outages: {len(downs)}, Resolved: {len(ups)}, Unresolved: {len(ongoing)}",
     ]
-    lines += [_fmt_event_line(e) for e in downs] or ["  none"]
-    lines.append("")
+    for e in downs:
+        plain_lines.append(f"  DOWN: [{e['group']}] {e['practice']} / {e['system_name']} at {e['ts'].strftime('%I:%M:%S %p')}")
+    for e in ups:
+        plain_lines.append(f"  UP: [{e['group']}] {e['practice']} / {e['system_name']} at {e['ts'].strftime('%I:%M:%S %p')}")
+    for name, info, dur in ongoing:
+        practice, group, node_type = _node_label(name, info["ip_address"], info["is_server"])
+        plain_lines.append(f"  UNRESOLVED: [{group}] {practice} / {name} — {dur}")
 
-    lines.append("RESOLUTIONS TODAY:")
-    lines += [_fmt_event_line(e) for e in ups] or ["  none"]
-    lines.append("")
+    all_clear = len(ongoing) == 0
+    status_color = "#16a34a" if all_clear else "#dc2626"
+    status_text = "ALL CLEAR" if all_clear else f"{len(ongoing)} UNRESOLVED"
 
-    lines.append("UNRESOLVED AT END OF DAY:")
+    ongoing_rows = ""
     if ongoing:
         for name, info, dur in ongoing:
             practice, group, node_type = _node_label(name, info["ip_address"], info["is_server"])
             since = info["offline_since"].strftime('%I:%M:%S %p') if info["offline_since"] else "unknown"
-            lines.append(f"  [{group}] {practice} / {name} ({node_type}, {info['ip_address']}) "
-                         f"— offline since {since}, down {dur}")
+            ongoing_rows += f"""<tr>
+                <td><span class="badge badge-group">{group}</span></td>
+                <td><strong>{practice}</strong></td>
+                <td>{name}</td>
+                <td>{node_type}</td>
+                <td>{since}</td>
+                <td><span class="badge badge-down">{dur}</span></td>
+            </tr>"""
     else:
-        lines.append("  none — all clear")
+        ongoing_rows = '<tr class="none-row"><td colspan="6">✅ All systems online at end of day</td></tr>'
 
-    email_queue.put((subject, "\n".join(lines), CONFIG["ALERT_RECEIVER_EMAIL"]))
+    html = f"""<!DOCTYPE html><html><head><meta charset="utf-8">{_digest_email_style()}</head><body>
+    <div class="container">
+        <div class="header" style="background: linear-gradient(135deg, #1e3a5f, #0f766e);">
+            <div class="header-top">{'<img class="header-logo" src="' + LOGO_DATA_URI + '" alt="PDA">' if LOGO_DATA_URI else ''}<h1>\U0001f4cb End-of-Day Summary</h1></div>
+            <p>{now:%A, %B %d, %Y} — generated {now:%I:%M:%S %p IST}</p>
+        </div>
+        <div class="stats">
+            <div class="stat"><div class="num" style="color:#dc2626;">{len(downs)}</div><div class="label">Outages Today</div></div>
+            <div class="stat"><div class="num" style="color:#16a34a;">{len(ups)}</div><div class="label">Resolved Today</div></div>
+            <div class="stat"><div class="num" style="color:{status_color};">{len(ongoing)}</div><div class="label">{status_text}</div></div>
+        </div>
+        <div class="section">
+            <div class="section-title">\U0001f534 Outages Detected Today ({len(downs)})</div>
+            <table><tr><th>Group</th><th>Site</th><th>System</th><th>Type</th><th>Time</th></tr>
+            {_event_rows_html(downs, "badge-down")}
+            </table>
+        </div>
+        <div class="section">
+            <div class="section-title">✅ Resolutions Today ({len(ups)})</div>
+            <table><tr><th>Group</th><th>Site</th><th>System</th><th>Type</th><th>Time</th></tr>
+            {_event_rows_html(ups, "badge-up")}
+            </table>
+        </div>
+        <div class="section">
+            <div class="section-title">⚠️ Unresolved at End of Day ({len(ongoing)})</div>
+            <table><tr><th>Group</th><th>Site</th><th>System</th><th>Type</th><th>Since</th><th>Duration</th></tr>
+            {ongoing_rows}
+            </table>
+        </div>
+        <div class="footer">PDA/PESCOE Uptime Tracker &bull; Powered by PESCOE Systems &bull; Daily Report</div>
+    </div>
+    </body></html>"""
+
+    email_queue.put((subject, "\n".join(plain_lines), CONFIG["ALERT_RECEIVER_EMAIL"], html))
 
 
 # ---------------------------------------------------------------------------
