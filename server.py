@@ -182,7 +182,7 @@ def load_config():
         # digest emails). Set to 0 to keep email-only alerting.
         "PUSH_ON_TRANSITIONS": os.environ.get("PUSH_ON_TRANSITIONS", "1") == "1",
 
-        "PUBLIC_URL": os.environ.get("PUBLIC_URL", "http://182.156.143.144"),
+        "PUBLIC_URL": os.environ.get("PUBLIC_URL", "https://uptimetracker.withbytecycle.com"),
     }
 
     if not cfg["SECRET_KEY"]:
