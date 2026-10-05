@@ -65,7 +65,7 @@ from datetime import datetime, timezone, timedelta
 
 from flask import (
     Flask, request, render_template_string, redirect,
-    url_for, session, jsonify, abort, Response, Blueprint,
+    url_for, session, jsonify, abort, Response, Blueprint, send_file,
 )
 
 # Web Push (mobile/background notifications). Optional: if the libraries aren't
@@ -181,6 +181,8 @@ def load_config():
         # Send a push for every individual node transition (as well as the
         # digest emails). Set to 0 to keep email-only alerting.
         "PUSH_ON_TRANSITIONS": os.environ.get("PUSH_ON_TRANSITIONS", "1") == "1",
+
+        "PUBLIC_URL": os.environ.get("PUBLIC_URL", "http://182.156.143.144"),
     }
 
     if not cfg["SECRET_KEY"]:
@@ -1251,7 +1253,7 @@ def send_outage_digest():
     html = f"""<!DOCTYPE html><html><head><meta charset="utf-8">{_digest_email_style()}</head><body>
     <div class="container">
         <div class="header" style="background: linear-gradient(135deg, #1e3a5f, #2563eb);">
-            <div class="header-top">{'<img class="header-logo" src="' + LOGO_DATA_URI + '" alt="PDA">' if LOGO_DATA_URI else ''}<h1>\U0001f6a8 Outage Digest</h1></div>
+            <div class="header-top">{'<img class="header-logo" src="' + CONFIG["PUBLIC_URL"] + '/logo.png" alt="PDA">' if LOGO_DATA_URI else ''}<h1>\U0001f6a8 Outage Digest</h1></div>
             <p>{CONFIG['DIGEST_INTERVAL_MIN']}-minute window ending {now:%Y-%m-%d %I:%M:%S %p IST}</p>
         </div>
         <div class="stats">
@@ -1337,7 +1339,7 @@ def send_eod_report():
     html = f"""<!DOCTYPE html><html><head><meta charset="utf-8">{_digest_email_style()}</head><body>
     <div class="container">
         <div class="header" style="background: linear-gradient(135deg, #1e3a5f, #0f766e);">
-            <div class="header-top">{'<img class="header-logo" src="' + LOGO_DATA_URI + '" alt="PDA">' if LOGO_DATA_URI else ''}<h1>\U0001f4cb End-of-Day Summary</h1></div>
+            <div class="header-top">{'<img class="header-logo" src="' + CONFIG["PUBLIC_URL"] + '/logo.png" alt="PDA">' if LOGO_DATA_URI else ''}<h1>\U0001f4cb End-of-Day Summary</h1></div>
             <p>{now:%A, %B %d, %Y} — generated {now:%I:%M:%S %p IST}</p>
         </div>
         <div class="stats">
@@ -1384,12 +1386,48 @@ def hash_otp(code):
 
 def send_otp_email(otp_code, event_time):
     ist = event_time.strftime('%Y-%m-%d %I:%M:%S %p IST')
-    subject = "🔐 PESCOE Dashboard Login Verification Code"
+    expiry = OTP_EXPIRY_SECONDS // 60
+    subject = "🔐 Systems Uptime Dashboard Login Verification Code"
     body = (f"Your one-time login verification code is: {otp_code}\n\n"
-            f"This code expires in {OTP_EXPIRY_SECONDS // 60} minutes. Requested at: {ist}\n\n"
+            f"This code expires in {expiry} minutes. Requested at: {ist}\n\n"
             f"If you did not request this, you can ignore this email.")
-    # OTP is sent synchronously: the user is waiting and we need the result to decide the redirect.
-    return _send_email_now(subject, body, CONFIG["OTP_RECEIVER_EMAIL"])
+    logo_url = CONFIG["PUBLIC_URL"] + "/logo.png"
+    style = _digest_email_style()
+    html = f"""<html><body style="margin:0;padding:0;background:#f3f4f6;font-family:'Segoe UI',Arial,sans-serif;">
+<div style="max-width:520px;margin:0 auto;padding:24px 16px;">
+ <div style="background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+  <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb);padding:28px 32px;text-align:center;">
+   <img src="{logo_url}" alt="PDA" style="height:40px;border-radius:6px;margin-bottom:12px;">
+   <div style="color:#fff;font-size:18px;font-weight:600;">Login Verification</div>
+   <div style="color:rgba(255,255,255,0.75);font-size:12px;margin-top:4px;">PESCOE Systems Uptime Dashboard</div>
+  </div>
+  <div style="padding:32px;">
+   <p style="color:#374151;font-size:14px;margin:0 0 24px;line-height:1.6;">
+    A login attempt was made to the PESCOE Systems Uptime Dashboard. Use the verification code below to complete your sign-in.
+   </p>
+   <div style="text-align:center;margin:0 0 24px;">
+    <div style="display:inline-block;background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:2px solid #3b82f6;border-radius:12px;padding:16px 32px;">
+     <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;">Verification Code</div>
+     <div style="font-size:36px;font-weight:700;letter-spacing:8px;color:#1e3a5f;font-family:'Courier New',monospace;">{otp_code}</div>
+    </div>
+   </div>
+   <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:24px;">
+    <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f0f0f0;">Expires in</td>
+        <td style="padding:8px 0;color:#1e293b;font-weight:600;text-align:right;border-bottom:1px solid #f0f0f0;">{expiry} minutes</td></tr>
+    <tr><td style="padding:8px 0;color:#6b7280;">Requested at</td>
+        <td style="padding:8px 0;color:#1e293b;font-weight:600;text-align:right;">{ist}</td></tr>
+   </table>
+   <div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;font-size:12px;color:#92400e;line-height:1.5;">
+    &#9888;&#65039; If you did not request this code, you can safely ignore this email. Do not share this code with anyone.
+   </div>
+  </div>
+  <div style="padding:16px 32px;text-align:center;font-size:11px;color:#9ca3af;border-top:1px solid #f0f0f0;">
+   PDA/PESCOE Uptime Tracker &bull; Powered by PESCOE Systems
+  </div>
+ </div>
+</div>
+</body></html>"""
+    return _send_email_now(subject, body, CONFIG["OTP_RECEIVER_EMAIL"], html=html)
 
 
 # ---------------------------------------------------------------------------
@@ -1649,54 +1687,38 @@ LOGIN_TEMPLATE = """
 <style>""" + _SHARED_CSS + """
     body{overflow:hidden;}
 
-    /* ── Splash: Network Nodes ─────────────────────── */
-    .splash{position:fixed;inset:0;z-index:9999;background:#f1f5f9;
+    /* ── Splash: Liquid Morph ─────────────────────── */
+    .splash{position:fixed;inset:0;z-index:9999;
+            background:linear-gradient(135deg,#e8ecf4 0%,#f1f5f9 40%,#e2e8f0 100%);
             display:flex;flex-direction:column;align-items:center;justify-content:center;
-            opacity:1;transition:opacity .8s ease;}
+            opacity:1;transition:opacity 1s ease;overflow:hidden;}
     .splash.hide{opacity:0;pointer-events:none;}
 
-    .net-svg{width:min(420px,90vw);height:auto;}
-    .net-line{stroke:var(--accent-blue);stroke-width:1.2;stroke-dasharray:200;
-              stroke-dashoffset:200;opacity:0.5;filter:drop-shadow(0 0 3px rgba(59,130,246,.3));}
-    .net-node{fill:var(--accent-blue);opacity:0;filter:drop-shadow(0 0 4px rgba(59,130,246,.5));}
-    .net-hub{fill:#e0ecff;stroke:var(--accent-blue);stroke-width:2.5;opacity:0;
-             filter:drop-shadow(0 0 12px rgba(37,99,235,.3));}
-    .net-hub-logo{opacity:0;}
+    .liquid-canvas{position:absolute;inset:0;width:100%;height:100%;}
+    .splash-content{position:relative;z-index:2;display:flex;flex-direction:column;
+                    align-items:center;justify-content:center;}
+    .splash-logo{width:120px;height:120px;object-fit:contain;border-radius:20px;
+                 opacity:0;animation:logoReveal 1.2s 1.5s cubic-bezier(.16,1,.3,1) forwards;
+                 filter:drop-shadow(0 0 20px rgba(59,130,246,.2));}
 
-    @keyframes netLineDraw{to{stroke-dashoffset:0}}
-    @keyframes netNodePop{0%{r:0;opacity:0}60%{r:5;opacity:1}100%{r:4;opacity:0.9}}
-    @keyframes netHubGrow{0%{r:0;opacity:0}50%{r:98;opacity:1}100%{r:96;opacity:1}}
-    @keyframes netHubText{0%,60%{opacity:0}100%{opacity:1}}
-    @keyframes netNodePulse{0%,100%{opacity:0.6;r:4}50%{opacity:1;r:5}}
+    @keyframes logoReveal{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
     @keyframes splashFadeUp{to{opacity:1;transform:translateY(0)}}
     @keyframes splashLoad{to{width:100%}}
+    @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
 
-    .nl{animation:netLineDraw 1s ease forwards}
-    .nn{animation:netNodePop .5s ease forwards,netNodePulse 2s ease infinite}
-    .nh{animation:netHubGrow 1s ease forwards}
-    .nht{animation:netHubText .8s ease forwards}
-    .nhl{animation:netHubText .6s ease forwards}
-    .d1{animation-delay:.2s,.2s}.d2{animation-delay:.3s,.3s}.d3{animation-delay:.35s,.35s}
-    .d4{animation-delay:.4s,.4s}.d5{animation-delay:.45s,.45s}.d6{animation-delay:.5s,.5s}
-    .d7{animation-delay:.55s,.55s}.d8{animation-delay:.6s,.6s}.d9{animation-delay:.65s,.65s}
-    .d10{animation-delay:.7s,.7s}
-    .nd1{animation-delay:.6s,2s}.nd2{animation-delay:.65s,2.1s}.nd3{animation-delay:.7s,2.2s}
-    .nd4{animation-delay:.75s,2.3s}.nd5{animation-delay:.8s,2.4s}.nd6{animation-delay:.85s,2.15s}
-    .nd7{animation-delay:.72s,2.05s}.nd8{animation-delay:.78s,2.25s}.nd9{animation-delay:.88s,2.35s}
-    .nd10{animation-delay:.95s,2.45s}
-    .nh{animation-delay:1.2s}
-    .nht{animation-delay:1.8s}
-    .nhl{animation-delay:2s}
-
-    .splash-title{margin-top:10px;font-size:22px;font-weight:700;letter-spacing:1px;
-                  color:var(--text-main);opacity:0;animation:splashFadeUp .8s 3s ease forwards;}
-    .splash-sub{margin-top:6px;font-size:12px;color:var(--text-muted);letter-spacing:4px;
-                text-transform:uppercase;opacity:0;animation:splashFadeUp .8s 3.4s ease forwards;}
-    .splash-bar{width:200px;height:3px;background:var(--border-color);border-radius:3px;
-                margin-top:24px;overflow:hidden;opacity:0;animation:splashFadeUp .5s 3.7s ease forwards;}
-    .splash-bar-fill{height:100%;width:0;
-                     background:linear-gradient(90deg,#3b82f6,#10b981);
-                     border-radius:3px;animation:splashLoad 1.5s 3.9s ease-in-out forwards;}
+    .splash-title{margin-top:18px;font-size:24px;font-weight:700;letter-spacing:1.5px;
+                  color:#1e293b;opacity:0;animation:splashFadeUp .8s 2.8s ease forwards;
+                  transform:translateY(10px);}
+    .splash-sub{margin-top:8px;font-size:11px;color:#64748b;letter-spacing:5px;
+                text-transform:uppercase;opacity:0;animation:splashFadeUp .8s 3.2s ease forwards;
+                transform:translateY(10px);}
+    .splash-bar{width:180px;height:2px;background:rgba(148,163,184,.3);border-radius:3px;
+                margin-top:28px;overflow:hidden;opacity:0;animation:splashFadeUp .5s 3.5s ease forwards;
+                transform:translateY(10px);}
+    .splash-bar-fill{height:100%;width:0;border-radius:3px;
+                     background:linear-gradient(90deg,#3b82f6,#8b5cf6,#10b981);
+                     background-size:200% 100%;
+                     animation:splashLoad 2.5s 3.7s ease-in-out forwards,shimmer 2s 3.7s linear infinite;}
 
     /* ── Hero login ────────────────────────────────── */
     body.ready{overflow:auto;}
@@ -1717,50 +1739,26 @@ LOGIN_TEMPLATE = """
 <style id="splashMotion">
     @media (prefers-reduced-motion:reduce){
         .splash,.splash *,.login-hero{animation:initial!important;transition:initial!important;}
-        .nl{animation:netLineDraw 1s ease forwards!important}
-        .nn{animation:netNodePop .5s ease forwards,netNodePulse 2s ease infinite!important}
-        .nh{animation:netHubGrow 1s ease forwards!important}
-        .nht{animation:netHubText .8s ease forwards!important}
-        .nhl{animation:netHubText .6s ease forwards!important}
-        .splash-title{animation:splashFadeUp .8s 3s ease forwards!important}
-        .splash-sub{animation:splashFadeUp .8s 3.4s ease forwards!important}
-        .splash-bar{animation:splashFadeUp .5s 3.7s ease forwards!important}
-        .splash-bar-fill{animation:splashLoad 1.5s 3.9s ease-in-out forwards!important}
-        .splash{transition:opacity .8s ease!important}
+        .splash-logo{opacity:1!important}
+        .splash-title{opacity:1!important;transform:none!important}
+        .splash-sub{opacity:1!important;transform:none!important}
+        .splash-bar{opacity:1!important;transform:none!important}
+        .splash-bar-fill{animation:splashLoad 2s ease-in-out forwards!important}
+        .splash{transition:opacity 1s ease!important}
         .login-hero{transition:opacity .6s .1s ease,transform .6s .1s ease!important}
     }
 </style>
 </head><body>
 
-<!-- Splash -->
+<!-- Splash: Liquid Morph -->
 <div class="splash" id="splash">
-    <svg class="net-svg" viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg">
-        <line class="net-line nl d1"  x1="60"  y1="50"  x2="210" y2="130"/>
-        <line class="net-line nl d4"  x1="360" y1="45"  x2="210" y2="130"/>
-        <line class="net-line nl d6"  x1="40"  y1="200" x2="210" y2="130"/>
-        <line class="net-line nl d10" x1="380" y1="210" x2="210" y2="130"/>
-        <line class="net-line nl d2"  x1="30"  y1="130" x2="210" y2="130"/>
-        <line class="net-line nl d8"  x1="390" y1="130" x2="210" y2="130"/>
-        <line class="net-line nl d3"  x1="140" y1="30"  x2="210" y2="130"/>
-        <line class="net-line nl d5"  x1="290" y1="25"  x2="210" y2="130"/>
-        <line class="net-line nl d7"  x1="120" y1="230" x2="210" y2="130"/>
-        <line class="net-line nl d9"  x1="310" y1="235" x2="210" y2="130"/>
-        <circle class="net-node nn nd1"  cx="60"  cy="50"/>
-        <circle class="net-node nn nd2"  cx="360" cy="45"/>
-        <circle class="net-node nn nd3"  cx="40"  cy="200"/>
-        <circle class="net-node nn nd4"  cx="380" cy="210"/>
-        <circle class="net-node nn nd5"  cx="30"  cy="130"/>
-        <circle class="net-node nn nd6"  cx="390" cy="130"/>
-        <circle class="net-node nn nd7"  cx="140" cy="30"/>
-        <circle class="net-node nn nd8"  cx="290" cy="25"/>
-        <circle class="net-node nn nd9"  cx="120" cy="230"/>
-        <circle class="net-node nn nd10" cx="310" cy="235"/>
-        <circle class="net-hub nh" cx="210" cy="130" r="0"/>
-        <image class="net-hub-logo nht" href="__LOGO_SRC__" x="138" y="58" width="144" height="144"/>
-    </svg>
-    <div class="splash-title">PESCOE Systems</div>
-    <div class="splash-sub">Uptime Dashboard</div>
-    <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+    <canvas class="liquid-canvas" id="liquidCanvas"></canvas>
+    <div class="splash-content">
+        <img class="splash-logo" src="__LOGO_SRC__" alt="PDA">
+        <div class="splash-title">PESCOE Systems</div>
+        <div class="splash-sub">Uptime Dashboard</div>
+        <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+    </div>
 </div>
 
 <!-- Hero login -->
@@ -1786,6 +1784,71 @@ LOGIN_TEMPLATE = """
 
 <script>
 (function(){
+    /* ── Liquid Morph Canvas ── */
+    var c=document.getElementById('liquidCanvas'),ctx=c.getContext('2d');
+    var w,h,blobs=[],t=0;
+    function resize(){w=c.width=c.offsetWidth;h=c.height=c.offsetHeight;}
+    resize(); window.addEventListener('resize',resize);
+
+    var colors=[
+        {r:59,g:130,b:246},{r:139,g:92,b:246},{r:16,g:185,b:129},
+        {r:99,g:102,b:241},{r:6,g:182,b:212},{r:37,g:99,b:235}
+    ];
+    for(var i=0;i<6;i++){
+        var col=colors[i%colors.length];
+        blobs.push({
+            x:w*(0.2+Math.random()*0.6), y:h*(0.2+Math.random()*0.6),
+            r:Math.min(w,h)*(0.08+Math.random()*0.12),
+            vx:(Math.random()-0.5)*0.4, vy:(Math.random()-0.5)*0.4,
+            phase:Math.random()*Math.PI*2, speed:0.005+Math.random()*0.008,
+            morph:0.15+Math.random()*0.2,
+            col:'rgba('+col.r+','+col.g+','+col.b+',0.15)'
+        });
+    }
+    function drawBlob(b,time){
+        ctx.beginPath();
+        var pts=8,angleStep=Math.PI*2/pts;
+        for(var j=0;j<=pts;j++){
+            var a=j*angleStep;
+            var wobble=1+Math.sin(a*3+time*b.speed*60+b.phase)*b.morph
+                        +Math.sin(a*2-time*b.speed*40)*b.morph*0.5;
+            var px=b.x+Math.cos(a)*b.r*wobble;
+            var py=b.y+Math.sin(a)*b.r*wobble;
+            if(j===0)ctx.moveTo(px,py);
+            else{
+                var pa=(j-0.5)*angleStep;
+                var pw=1+Math.sin(pa*3+time*b.speed*60+b.phase)*b.morph
+                        +Math.sin(pa*2-time*b.speed*40)*b.morph*0.5;
+                var cx1=b.x+Math.cos(pa)*b.r*pw*1.1;
+                var cy1=b.y+Math.sin(pa)*b.r*pw*1.1;
+                ctx.quadraticCurveTo(cx1,cy1,px,py);
+            }
+        }
+        ctx.closePath();
+        var g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r*1.5);
+        g.addColorStop(0,b.col);
+        g.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=g;
+        ctx.fill();
+    }
+    var running=true;
+    function animate(){
+        if(!running)return;
+        ctx.clearRect(0,0,w,h);
+        t++;
+        for(var i=0;i<blobs.length;i++){
+            var b=blobs[i];
+            b.x+=b.vx+Math.sin(t*b.speed)*0.5;
+            b.y+=b.vy+Math.cos(t*b.speed*0.7)*0.5;
+            if(b.x<-b.r)b.x=w+b.r;if(b.x>w+b.r)b.x=-b.r;
+            if(b.y<-b.r)b.y=h+b.r;if(b.y>h+b.r)b.y=-b.r;
+            drawBlob(b,t);
+        }
+        requestAnimationFrame(animate);
+    }
+    animate();
+
+    /* ── Splash dismiss ── */
     var splash=document.getElementById('splash');
     var hero=document.getElementById('loginHero');
     setTimeout(function(){
@@ -1793,7 +1856,10 @@ LOGIN_TEMPLATE = """
         document.body.classList.add('ready');
         hero.classList.add('show');
     }, 9000);
-    splash.addEventListener('transitionend',function(){splash.style.display='none';});
+    splash.addEventListener('transitionend',function(){
+        splash.style.display='none';
+        running=false;
+    });
 })();
 </script>
 </body></html>
@@ -3504,6 +3570,14 @@ def verify_otp():
             else:
                 error = "Incorrect verification code."
     return render_template_string(OTP_TEMPLATE, error=error, csrf_token=get_csrf_token())
+
+
+@app.route('/logo.png')
+def serve_logo():
+    logo_path = Path(__file__).with_name("PDA Logo.png")
+    if logo_path.exists():
+        return send_file(logo_path, mimetype="image/png")
+    abort(404)
 
 
 @app.route('/logout')
