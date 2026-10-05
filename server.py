@@ -2171,6 +2171,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
     box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
     animation: pulse 2.2s ease-out infinite;
   }.mrk .health-pill.warn .beacon{ background: var(--yellow); animation: none; }.mrk .health-pill.crit .beacon{ background: var(--red); animation: none; }
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
   @keyframes pulse {
     0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55); }
     70%  { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
@@ -2388,9 +2389,10 @@ th[data-key]:focus-visible{outline-offset:-2px;}
 <div class="container">
     <div id="srStatus" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
     <header>
-        <h1><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>PESCOE Systems Dashboard</span></h1>
+        <h1><img src="/logo.png" alt="PDA" style="height:32px;border-radius:4px;"><span>PESCOE Systems Dashboard</span></h1>
         <div class="header-actions">
             <div class="refresh-indicator" id="refreshInd"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span id="refreshLabel">Live · updating…</span></div>
+            <button class="theme-btn" onclick="refresh();this.querySelector('.ico').style.animation='spin .6s ease';setTimeout(()=>this.querySelector('.ico').style.animation='',600)"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg><span>Refresh</span></button>
             <button class="theme-btn notif-btn" id="notifToggler" onclick="toggleNotifs()"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span id="notifLabel">Notifications</span></button>
             <button class="theme-btn" id="themeToggler" onclick="toggleTheme()"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 0 0 20z" fill="currentColor" stroke="none"/></svg><span id="themeLabel">Light Theme</span></button>
             <a href="/logout" class="logout-btn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Logout</span></a>
