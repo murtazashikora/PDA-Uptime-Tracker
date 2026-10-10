@@ -1909,7 +1909,7 @@ DASHBOARD_TEMPLATE = r"""
 :root{--bg-color:#f6f8fb;--card-bg:#ffffff;--th-bg:#f1f4f8;--text-main:#1a2332;--text-system-name:#1a2332;
 --text-muted:#64748b;--text-subtle:#6b7a8d;--border-color:#e8edf3;--border-strong:#cbd5e1;
 --online-color:#059669;--offline-color:#dc2626;
---accent-blue:#0066cc;--accent-purple:#7c3aed;--accent-orange:#d97706;--row-hover:#f8fafd;
+--accent-blue:#0066cc;--accent-purple:#7c3aed;--accent-orange:#b45309;--row-hover:#f8fafd;
 --btn-bg:#ffffff;--btn-hover:#f1f5f9;--search-bg:#ffffff;--search-border:#e8edf3;
 --filter-active-bg:#0066cc;--filter-active-text:#fff;
 --shadow-sm:0 1px 2px rgba(0,0,0,0.04);--shadow-md:0 2px 8px rgba(0,0,0,0.06);
@@ -1940,6 +1940,7 @@ h1{margin:0;font-family:var(--sans);font-size:20px;font-weight:600;letter-spacin
 .logout-btn{color:var(--offline-color);}
 .logout-btn:hover{background:var(--red-soft);border-color:var(--red-border);}
 .section-title{font-family:var(--sans);font-size:13px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin:16px 0 8px;font-weight:600;padding:8px 0;display:flex;justify-content:space-between;align-items:center;}
+.section-title>button{all:unset;cursor:pointer;display:flex;align-items:center;gap:4px;font:inherit;color:inherit;text-transform:inherit;letter-spacing:inherit;}
 .section-total-badge{font-size:12px;font-weight:500;color:var(--text-muted);background:var(--bg-color);padding:3px 10px;border-radius:6px;border:1px solid var(--border-color);text-transform:none;}
 .systems-head,.collapse-head{cursor:pointer;user-select:none;}
 .systems-head:hover,.collapse-head:hover{color:var(--text-main);}
@@ -1977,7 +1978,8 @@ h1{margin:0;font-family:var(--sans);font-size:20px;font-weight:600;letter-spacin
 .table-container{background:var(--card-bg);border:1px solid var(--border-color);border-radius:12px;overflow:hidden;margin-top:0;box-shadow:var(--shadow-sm);}
 table{width:100%;border-collapse:collapse;text-align:left;}
 th,td{padding:12px 16px;}
-th{background:var(--th-bg);color:var(--text-subtle);font-family:var(--sans);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border-color);cursor:pointer;user-select:none;}
+th{background:var(--th-bg);color:var(--text-subtle);font-family:var(--sans);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border-color);user-select:none;}
+th[data-key]>button{all:unset;cursor:pointer;display:flex;align-items:center;gap:4px;width:100%;font:inherit;color:inherit;text-transform:inherit;letter-spacing:inherit;}
 th .arrow{opacity:.5;font-size:11px;}
 tr{border-bottom:1px solid var(--border-color);}
 tr:last-child{border-bottom:none;}
@@ -2392,11 +2394,10 @@ th[data-key]:focus-visible{outline-offset:-2px;}
         <div class="card" style="border-top:3px solid var(--offline-color)"><div class="card-title">Active Outages</div><div class="card-value" id="s_total_offline" style="color:var(--offline-color)">–</div></div>
     </div>
 
-    <div class="section-title collapse-head" id="clientToggle" role="button" tabindex="0"
-         aria-expanded="false" aria-controls="clientCollapsible" onclick="toggleSection('client')"
-         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSection('client');}">
-        <span><svg class="ico chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>Client Summary</span>
-        <span class="section-total-badge">Workstations: <span id="s_total_workstations">–</span> · Servers: <span id="s_total_servers">–</span></span></div>
+    <h2 class="section-title collapse-head" id="clientToggle"
+         aria-expanded="false" aria-controls="clientCollapsible">
+        <button type="button" onclick="toggleSection('client')"><svg class="ico chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>Client Summary</button>
+        <span class="section-total-badge">Workstations: <span id="s_total_workstations">–</span> · Servers: <span id="s_total_servers">–</span></span></h2>
     <div id="clientCollapsible">
     <div class="client-grid">
         <div class="card" style="border-top:3px solid var(--accent-blue)"><div class="card-title" style="font-family:var(--sans);font-size:14px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--text-main)">PDA Group</div>
@@ -2432,12 +2433,11 @@ th[data-key]:focus-visible{outline-offset:-2px;}
     </div>
     </div>
 
-    <div class="section-title systems-head" id="systemsToggle" role="button" tabindex="0"
-         aria-expanded="false" aria-controls="systemsCollapsible" onclick="toggleSystems()"
-         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSystems();}">
-        <span><svg class="ico chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>System Nodes<span class="section-total-badge" id="systemsCount" style="margin-left:10px">–</span></span>
+    <h2 class="section-title systems-head" id="systemsToggle"
+         aria-expanded="false" aria-controls="systemsCollapsible">
+        <button type="button" onclick="toggleSystems()"><svg class="ico chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>System Nodes<span class="section-total-badge" id="systemsCount" style="margin-left:10px">–</span></button>
         <span id="systemsHint" style="font-size:12px;font-weight:600;text-transform:none;color:var(--text-muted)">Show</span>
-    </div>
+    </h2>
     <div id="systemsCollapsible" hidden>
     <div class="controls-wrapper">
         <div class="search-container"><span class="search-icon"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
@@ -2457,14 +2457,14 @@ th[data-key]:focus-visible{outline-offset:-2px;}
         <div style="overflow-x:auto">
         <table id="systemsTable">
             <thead><tr>
-                <th data-key="business_group">Group <span class="arrow"></span></th>
-                <th data-key="practice_name">Practice <span class="arrow"></span></th>
-                <th data-key="system_name">System <span class="arrow"></span></th>
-                <th data-key="ip_address">Public IP <span class="arrow"></span></th>
-                <th data-key="status">Status <span class="arrow"></span></th>
-                <th data-key="last_seen">Last Keep-Alive <span class="arrow"></span></th>
-                <th data-key="uptime_24h">Uptime 24h / 7d <span class="arrow"></span></th>
-                <th data-key="duration_str">Outage <span class="arrow"></span></th>
+                <th data-key="business_group"><button type="button">Group <span class="arrow"></span></button></th>
+                <th data-key="practice_name"><button type="button">Practice <span class="arrow"></span></button></th>
+                <th data-key="system_name"><button type="button">System <span class="arrow"></span></button></th>
+                <th data-key="ip_address"><button type="button">Public IP <span class="arrow"></span></button></th>
+                <th data-key="status"><button type="button">Status <span class="arrow"></span></button></th>
+                <th data-key="last_seen"><button type="button">Last Keep-Alive <span class="arrow"></span></button></th>
+                <th data-key="uptime_24h"><button type="button">Uptime 24h / 7d <span class="arrow"></span></button></th>
+                <th data-key="duration_str"><button type="button">Outage <span class="arrow"></span></button></th>
                 <th>Actions</th>
             </tr></thead>
             <tbody id="tableBody"></tbody>
@@ -2473,11 +2473,10 @@ th[data-key]:focus-visible{outline-offset:-2px;}
     </div>
     </div>
 {% raw %}
-    <div class="section-title collapse-head" id="merakiToggle" role="button" tabindex="0"
-         aria-expanded="true" aria-controls="merakiCollapsible" onclick="toggleSection('meraki')"
-         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSection('meraki');}">
-        <span><svg class="ico chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>Network · Meraki MX</span>
-        <span id="merakiHint" style="font-size:12px;font-weight:600;text-transform:none;color:var(--text-muted)">Hide</span></div>
+    <h2 class="section-title collapse-head" id="merakiToggle"
+         aria-expanded="true" aria-controls="merakiCollapsible">
+        <button type="button" onclick="toggleSection('meraki')"><svg class="ico chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>Network · Meraki MX</button>
+        <span id="merakiHint" style="font-size:12px;font-weight:600;text-transform:none;color:var(--text-muted)">Hide</span></h2>
     <div id="merakiCollapsible">
     <section class="mrk" id="net-root">
 <div class="container" id="app">
@@ -2599,7 +2598,6 @@ function upClass(v){ return v>=99.5?'var(--online-color)':v>=95?'var(--accent-or
 function upLabel(v){ return v>=99.5?'':v>=95?' <span class="uptime-warn" role="img" aria-label="Below 99.5% threshold" title="Below 99.5% threshold">⚠</span>':' <span class="uptime-crit" role="img" aria-label="Below 95% threshold" title="Below 95% threshold">⚠</span>'; }
 
 function render(){
-    if(retireTarget) return;
     const q=(document.getElementById('nodeSearchInput').value||'').trim().toLowerCase();
     sessionStorage.setItem('activeSearchQuery', document.getElementById('nodeSearchInput').value);
 
@@ -2624,7 +2622,7 @@ function render(){
     const body=document.getElementById('tableBody');
     const sc=document.getElementById('systemsCount');
     if(sc) sc.textContent=rows.length+' of '+DATA.length+' nodes';
-    if(rows.length===0){ body.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px">No matching system nodes found.</td></tr>'; }
+    if(rows.length===0){ body.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px">No matching system nodes found.'+(filter!=='all'||q?' <button onclick="document.getElementById(\'nodeSearchInput\').value=\'\';document.getElementById(\'searchClear\').hidden=true;setFilter(\'all\')" style="all:unset;cursor:pointer;color:var(--accent-blue);text-decoration:underline;font-size:inherit">Clear filters</button>':'')+'</td></tr>'; }
     else {
         body.innerHTML = rows.map(m=>`<tr>
             <td class="business-group" data-label="Group">${esc(m.business_group)}</td>
@@ -2665,12 +2663,15 @@ function applySummary(s){
     const bannerBtn=document.getElementById('outageBannerBtn');
     const offCount=s.total_offline||0;
     if(banner){
+        const newContent=offCount>0?offCount+' active outage'+(offCount>1?'s':''):'';
+        const changed=banner.dataset.last!==newContent;
+        banner.dataset.last=newContent;
         if(offCount>0){
             const names=DATA.filter(m=>m.status==='Offline').map(m=>m.practice_name+' / '+m.system_name);
-            bannerBtn.innerHTML='<span class="banner-action">View all ▸</span><strong>'+offCount+' active outage'+(offCount>1?'s':'')+':</strong> '+esc(names.slice(0,5).join(', '))+(names.length>5?' + '+(names.length-5)+' more':'');
+            if(changed) bannerBtn.innerHTML='<span class="banner-action">View all ▸</span><strong>'+offCount+' active outage'+(offCount>1?'s':'')+':</strong> '+esc(names.slice(0,5).join(', '))+(names.length>5?' + '+(names.length-5)+' more':'');
             banner.hidden=false;
             document.title='('+offCount+') Outages — PESCOE Systems Dashboard';
-            setSection('client', false);
+            if(changed) setSection('client', false);
         }else{
             banner.hidden=true;
             document.title='PESCOE Systems Dashboard';
@@ -2749,19 +2750,15 @@ async function refresh(){
     }
 }
 
-let retireTarget=null;
 function retire(name){
     const rows=document.querySelectorAll('#tableBody tr');
     for(const tr of rows){
         const btn=tr.querySelector('.retire-btn');
         if(!btn||btn.dataset.name!==name) continue;
         if(btn.dataset.confirming==='1'){
-            btn.dataset.confirming='';retireTarget=null;
-            btn.textContent='Retire';
-            btn.style.cssText='';
+            resetRetireBtn(btn);
             return;
         }
-        retireTarget=name;
         btn.dataset.confirming='1';
         btn.innerHTML='Confirm retire?<br><span style="font-size:10px;font-weight:400;opacity:.8">Permanently removes from monitoring</span>';
         btn.style.background='var(--red-soft)';
@@ -2773,19 +2770,24 @@ function retire(name){
         cancel.className='retire-btn';
         cancel.textContent='Cancel';
         cancel.style.marginLeft='4px';
-        cancel.onclick=function(e){e.stopPropagation();btn.dataset.confirming='';retireTarget=null;btn.textContent='Retire';btn.style.cssText='';cancel.remove();};
+        cancel.onclick=function(e){e.stopPropagation();resetRetireBtn(btn);cancel.remove();};
         btn.parentNode.appendChild(cancel);
         btn.onclick=async function(){
             try{
                 const r=await fetch('/api/nodes/'+encodeURIComponent(name),{method:'DELETE',headers:{'X-CSRF-Token':CSRF}});
                 if(!r.ok){showToast('Retire failed — server returned '+r.status);return;}
-                showToast(name+' retired successfully');
+                showToast(name+' retired successfully','success');
             }catch(e){showToast('Retire failed — network error');}
-            retireTarget=null;
             refresh();
         };
         return;
     }
+}
+function resetRetireBtn(btn){
+    btn.dataset.confirming='';
+    btn.textContent='Retire';
+    btn.style.cssText='';
+    btn.onclick=function(){retire(btn.dataset.name);};
 }
 
 function applySort(k){
@@ -2794,12 +2796,8 @@ function applySort(k){
     render();
 }
 document.querySelectorAll('th[data-key]').forEach(th=>{
-    th.setAttribute('tabindex','0');
-    th.setAttribute('role','button');
-    th.addEventListener('click', ()=>applySort(th.dataset.key));
-    th.addEventListener('keydown', e=>{
-        if(e.key==='Enter' || e.key===' '){ e.preventDefault(); applySort(th.dataset.key); }
-    });
+    const btn=th.querySelector('button');
+    if(btn) btn.addEventListener('click', ()=>applySort(th.dataset.key));
 });
 
 function toggleTheme(){
@@ -3255,16 +3253,20 @@ async function loadDevices() {
 }
 
 async function refreshDevices() {
-  await fetch('/meraki/api/refresh', { method: 'POST' });
-  loadDevices();
+  try{
+    await fetch('/meraki/api/refresh', { method: 'POST' });
+    loadDevices();
+  }catch(e){showToast('Refresh failed — network error');}
 }
 
 async function toggleAutoRefresh(enabled) {
-  await fetch('/meraki/api/auto-refresh', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ enabled })
-  });
+  try{
+    await fetch('/meraki/api/auto-refresh', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ enabled })
+    });
+  }catch(e){showToast('Auto-refresh toggle failed');}
 }
 
 function updateRefreshLabel(ts) {
@@ -3426,28 +3428,36 @@ function pollUntilDone(serial) {
 // The MX "speed test" is Meraki's device-to-cloud throughput live tool —
 // there is no separate liveTools/speedTest endpoint in the Dashboard API.
 async function startSpeedTest(serial) {
-  const res = await fetch('/meraki/api/throughput-test', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ serial })
-  });
-  const data = await res.json();
-  if (data.error) { showToast(data.error); return; }
-  speedResults[serial] = { status: 'running' };
-  renderDevices();
-  pollUntilDone(serial);
+  try{
+    const res = await fetch('/meraki/api/throughput-test', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ serial })
+    });
+    const data = await res.json();
+    if (data.error) { showToast(data.error); return; }
+    speedResults[serial] = { status: 'running' };
+    renderDevices();
+    pollUntilDone(serial);
+  }catch(e){showToast('Speed test failed — network error');}
 }
 
 /* Lightweight non-blocking toast (replaces alert) */
-function showToast(msg) {
+function showToast(msg, type) {
   let t = document.getElementById('toast');
   if (!t) {
     t = document.createElement('div');
     t.id = 'toast';
     t.setAttribute('role', 'alert');
     t.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;'
-      + 'background:var(--card-solid);border:1px solid rgba(239,68,68,0.4);color:var(--danger-text);'
       + 'padding:12px 18px;border-radius:12px;font-size:13px;box-shadow:var(--shadow);max-width:90vw';
     (document.getElementById('net-root') || document.body).appendChild(t);
+  }
+  if(type==='success'){
+    t.style.background='var(--card-solid)';t.style.borderColor='var(--online-color)';t.style.color='var(--online-color)';
+    t.style.border='1px solid var(--online-color)';
+  }else{
+    t.style.background='var(--card-solid)';t.style.color='var(--danger-text)';
+    t.style.border='1px solid rgba(239,68,68,0.4)';
   }
   t.textContent = msg;
   t.style.display = 'block';
