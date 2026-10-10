@@ -1947,9 +1947,9 @@ h1{margin:0;font-family:var(--sans);font-size:20px;font-weight:600;letter-spacin
 .systems-head .chev,.collapse-head .chev{width:14px;height:14px;transition:transform .2s ease;}
 .systems-head[aria-expanded="true"] .chev,.collapse-head[aria-expanded="true"] .chev{transform:rotate(90deg);}
 .metrics-grid.compact{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;}
-.metrics-grid.compact .card{padding:16px 18px;border-left:3px solid var(--accent-blue);}
-.metrics-grid.compact .card:nth-child(2){border-left-color:var(--accent-purple);}
-.metrics-grid.compact .card:nth-child(3){border-left-color:var(--accent-orange);}
+.metrics-grid.compact .card{padding:16px 18px;border-top:3px solid var(--accent-blue);}
+.metrics-grid.compact .card:nth-child(2){border-top-color:var(--accent-purple);}
+.metrics-grid.compact .card:nth-child(3){border-top-color:var(--accent-orange);}
 .metrics-grid.compact .card-value{font-size:14px;font-weight:600;}
 .metrics-grid.compact .card-title{font-family:var(--sans);font-size:14px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--text-main);margin-bottom:8px;}
 .metrics-grid.compact .card-split-values{gap:16px;margin-top:4px;}
@@ -2001,6 +2001,8 @@ tr:hover{background:var(--row-hover);}
 .notif-btn.notif-off{opacity:.55;}
 .notif-btn.notif-blocked{opacity:.55;cursor:not-allowed;}
 .client-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:28px;}
+.outage-banner{background:var(--red-soft);color:var(--offline-color);border:1px solid var(--red-border);border-radius:10px;padding:12px 18px;margin-bottom:16px;font-size:13px;font-weight:500;line-height:1.5;}
+.outage-banner strong{font-weight:700;}
 
 /* ---- Icons, focus, live-region ------------------------------------------ */
 .ico{width:1.05em;height:1.05em;flex:0 0 auto;vertical-align:-2px;stroke-width:2;}
@@ -2067,101 +2069,60 @@ th[data-key]:focus-visible{outline-offset:-2px;}
 
 /* ===== Meraki MX section (scoped under .mrk) ===== */
 {% raw %}.mrk{
-    
-    --bg: #0a0f1c;
-    --bg-2: #0d1526;
-    --card: rgba(20, 30, 52, 0.55);
-    --card-solid: #141e34;
-    --glass-border: rgba(120, 150, 200, 0.18);
+    --bg: var(--bg-color);
+    --bg-2: var(--bg-color);
+    --card: var(--card-bg);
+    --card-solid: var(--card-bg);
+    --glass-border: var(--border-color);
     --glass-highlight: rgba(255, 255, 255, 0.06);
-    --track: rgba(120, 150, 200, 0.16);
+    --track: var(--border-color);
 
-    
-    --text: #f4f7fb;
-    --subtle: #c6d2e4;
-    --muted: #93a1bd;      
+    --text: var(--text-main);
+    --subtle: var(--text-muted);
+    --muted: var(--text-subtle);
 
-    
-    --brand: #0048a8;          
+    --brand: #0048a8;
     --brand-strong: #003c8f;
-    --brand-bright: #3b82f6;   
-    --brand-soft: rgba(0, 72, 168, 0.16);
-    --accent: #0a5bd0;         
+    --brand-bright: var(--accent-blue);
+    --brand-soft: rgba(0, 72, 168, 0.08);
+    --accent: var(--accent-blue);
     --on-accent: #ffffff;
-    --info: #3b82f6;
-    --purple: #a855f7;
-    --green: #22c55e;
-    --yellow: #eab308;
-    --red: #ef4444;
-    --gray: #64748b;
+    --info: var(--accent-blue);
+    --purple: var(--accent-purple);
+    --green: var(--online-color);
+    --yellow: var(--accent-orange);
+    --red: var(--offline-color);
+    --gray: var(--text-subtle);
 
-    
-    --ring: #7fb0ff;
+    --ring: var(--accent-blue);
 
-    
-    --input-bg: rgba(11, 15, 26, 0.6);
-    --danger-text: #fca5a5;
-    --warn-text: #fde047;
+    --input-bg: var(--search-bg);
+    --danger-text: var(--offline-color);
+    --warn-text: var(--accent-orange);
 
-    --radius: 16px;
-    --radius-sm: 10px;
-    --shadow: 0 10px 34px rgba(3, 12, 32, 0.5);
-    --blur: 16px;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: var(--shadow-md);
+    --blur: 0px;
 
-    
-    --field:
-      radial-gradient(40rem 40rem at 10% -10%, rgba(0, 72, 168, 0.30), transparent 60%),
-      radial-gradient(34rem 34rem at 110% 6%, rgba(59, 130, 246, 0.18), transparent 58%),
-      radial-gradient(42rem 42rem at 50% 122%, rgba(0, 72, 168, 0.14), transparent 60%),
-      linear-gradient(180deg, var(--bg-2), var(--bg));
+    --field: none;
 
-    
     --space-1: 6px;  --space-2: 10px; --space-3: 14px;
     --space-4: 20px; --space-5: 28px; --space-6: 40px;
 
-    --mono: 'Fira Code', ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
-    --sans: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    --head: 'Lexend', 'Source Sans 3', -apple-system, 'Segoe UI', system-ui, sans-serif;
-  }[data-theme="light"] .mrk{
-    --bg: #eef2f8;
-    --bg-2: #f7f9fc;
-    --card: rgba(255, 255, 255, 0.74);
-    --card-solid: #ffffff;
-    --glass-border: rgba(2, 32, 71, 0.12);
-    --glass-highlight: rgba(255, 255, 255, 0.9);
-    --track: rgba(2, 32, 71, 0.10);
-
-    --text: #0f1b2d;
-    --subtle: #33415c;
-    --muted: #566379;          
-
-    --brand-bright: #0a5bd0;   
-    --ring: #0a5bd0;
-
-    --input-bg: #ffffff;
-    --danger-text: #b91c1c;
-    --warn-text: #92610a;
-    --shadow: 0 10px 30px rgba(20, 40, 80, 0.12);
-    --field:
-      radial-gradient(42rem 42rem at 8% -12%, rgba(0, 72, 168, 0.12), transparent 60%),
-      radial-gradient(34rem 34rem at 112% 4%, rgba(59, 130, 246, 0.10), transparent 58%),
-      radial-gradient(42rem 42rem at 50% 122%, rgba(0, 72, 168, 0.07), transparent 60%),
-      linear-gradient(180deg, var(--bg-2), var(--bg));
+    --mrk-mono: 'Fira Code', ui-monospace, 'Cascadia Code', Consolas, monospace;
+    --mrk-sans: 'Source Sans 3', -apple-system, 'Segoe UI', sans-serif;
+    --mrk-head: 'Lexend', 'Source Sans 3', -apple-system, 'Segoe UI', sans-serif;
+    --mono: var(--mrk-mono);
+    --sans: var(--mrk-sans);
+    --head: var(--mrk-head);
   }.mrk *{ box-sizing: border-box; margin: 0; padding: 0; }.mrk{ -webkit-text-size-adjust: 100%; }.mrk{
     font-family: var(--sans);
-    background: var(--bg);
+    background: transparent;
     color: var(--text);
-    
-    padding: var(--space-5) var(--space-4);
+    padding: var(--space-5) 0;
     line-height: 1.5;
-    position: relative;
     overflow-x: hidden;
-  }.mrk::before{
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: var(--field);
   }.mrk .container{ max-width: 1120px; margin: 0 auto; }.mrk a{ color: var(--brand-bright); }.mrk :focus-visible{
     outline: 2px solid var(--ring);
     outline-offset: 2px;
@@ -2179,14 +2140,12 @@ th[data-key]:focus-visible{outline-offset:-2px;}
   }.mrk .logo img{ height: 26px; width: auto; display: block; }.mrk .header-spacer{ flex: 1; }.mrk .theme-toggle{
     width: 38px; height: 38px; flex-shrink: 0; border-radius: 10px; cursor: pointer;
     background: var(--card); border: 1px solid var(--glass-border); color: var(--subtle);
-    -webkit-backdrop-filter: blur(var(--blur)); backdrop-filter: blur(var(--blur));
     display: inline-flex; align-items: center; justify-content: center;
     transition: color 0.15s, border-color 0.15s, transform 0.12s;
   }.mrk .theme-toggle:hover{ color: var(--text); border-color: var(--brand-bright); }.mrk .theme-toggle:active{ transform: translateY(1px); }.mrk .theme-toggle svg{ width: 18px; height: 18px; }.mrk .theme-toggle .icon-sun{ display: none; }[data-theme="light"] .mrk .theme-toggle .icon-sun{ display: block; }[data-theme="light"] .mrk .theme-toggle .icon-moon{ display: none; }.mrk .health-pill{
     display: inline-flex; align-items: center; gap: 8px;
     padding: 8px 14px; border-radius: 999px;
     background: var(--card); border: 1px solid var(--glass-border);
-    -webkit-backdrop-filter: blur(var(--blur)); backdrop-filter: blur(var(--blur));
     font-size: 13px; font-weight: 600;
   }.mrk .health-pill .beacon{
     width: 9px; height: 9px; border-radius: 50%; background: var(--green);
@@ -2202,9 +2161,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
     background: var(--card);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius);
-    -webkit-backdrop-filter: blur(var(--blur));
-    backdrop-filter: blur(var(--blur));
-    box-shadow: var(--shadow), inset 0 1px 0 var(--glass-highlight);
+    box-shadow: var(--shadow);
   }.mrk .login-wrap{
     display: grid; grid-template-columns: 1.05fr 0.95fr; gap: var(--space-4);
     align-items: stretch; min-height: min(74vh, 620px); margin-top: var(--space-3);
@@ -2306,7 +2263,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
     margin-top: var(--space-3); padding-top: var(--space-3);
     border-top: 1px solid var(--glass-border);
     display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);
-  }.mrk .speed-slot{ margin-top: var(--space-3); min-height: 0; }.mrk .speed-bar-wrap{ min-width: 0; }.mrk .speed-label{ display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 4px; }.mrk .speed-label .val{ font-family: var(--mono); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }.mrk .speed-track{ height: 7px; background: var(--track); border-radius: 4px; overflow: hidden; }.mrk .speed-fill{ height: 100%; border-radius: 4px; transition: width 0.6s ease; }.mrk .speed-meta{ font-size: 11px; color: var(--muted); margin-top: 4px; grid-column: 1 / -1; }.mrk .async-note{
+  }.mrk .speed-slot{ margin-top: var(--space-3); min-height: 0; }.mrk .speed-bar-wrap{ min-width: 0; }.mrk .speed-label{ display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 4px; }.mrk .speed-label .val{ font-family: var(--mono); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }.mrk .speed-track{ height: 7px; background: var(--track); border-radius: 4px; overflow: hidden; }.mrk .speed-fill{ height: 100%; border-radius: 4px; transform-origin: left; transition: transform 0.6s ease; }.mrk .speed-meta{ font-size: 11px; color: var(--muted); margin-top: 4px; grid-column: 1 / -1; }.mrk .async-note{
     margin-top: var(--space-3); padding-top: var(--space-3);
     border-top: 1px solid var(--glass-border); font-size: 12px; color: var(--muted);
     display: flex; align-items: center; gap: 8px;
@@ -2368,8 +2325,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
 </style>
 <style>
 @media (prefers-reduced-motion:reduce){
-    .boot-overlay,.boot-overlay *{transition:revert!important;animation:revert!important;}
-    .boot-cursor{animation:bootBlink .7s step-end infinite!important;}
+    .boot-overlay{display:none!important;}
 }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2393,6 +2349,19 @@ th[data-key]:focus-visible{outline-offset:-2px;}
 </div>
 <script>
 (function(){
+    var ov=document.getElementById('bootOverlay');
+    if(!ov) return;
+    var seen=false;try{seen=localStorage.getItem('bootSeen')==='1';}catch(e){}
+    if(seen||window.matchMedia('(prefers-reduced-motion:reduce)').matches){
+        ov.style.display='none'; return;
+    }
+    function skipBoot(){
+        ov.classList.add('hide');
+        ov.addEventListener('transitionend',function(){ov.style.display='none';});
+        try{localStorage.setItem('bootSeen','1');}catch(e){}
+    }
+    ov.addEventListener('click',skipBoot);
+    document.addEventListener('keydown',function onKey(){skipBoot();document.removeEventListener('keydown',onKey);});
     var lines=document.querySelectorAll('.boot-line');
     var delays=[300,600,400,500,400,350,400,500];
     var t=200;
@@ -2400,11 +2369,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
         (function(el,d){setTimeout(function(){el.classList.add('show');},d);})(lines[i],t);
         t+=delays[i]||400;
     }
-    setTimeout(function(){
-        var ov=document.getElementById('bootOverlay');
-        ov.classList.add('hide');
-        ov.addEventListener('transitionend',function(){ov.style.display='none';});
-    },t+800);
+    setTimeout(skipBoot,t+800);
 })();
 </script>
 
@@ -2423,10 +2388,12 @@ th[data-key]:focus-visible{outline-offset:-2px;}
         </div>
     </header>
 
+    <div id="outageBanner" class="outage-banner" hidden role="alert"></div>
+
     <div class="metrics-grid">
-        <div class="card" style="border-left:3px solid var(--accent-blue)"><div class="card-title">Monitored Nodes</div><div class="card-value" id="s_total_nodes" style="color:var(--accent-blue)">–</div></div>
-        <div class="card" style="border-left:3px solid var(--online-color)"><div class="card-title">Systems Online</div><div class="card-value" id="s_total_online" style="color:var(--online-color)">–</div></div>
-        <div class="card" style="border-left:3px solid var(--offline-color)"><div class="card-title">Active Outages</div><div class="card-value" id="s_total_offline" style="color:var(--offline-color)">–</div></div>
+        <div class="card" style="border-top:3px solid var(--accent-blue)"><div class="card-title">Monitored Nodes</div><div class="card-value" id="s_total_nodes" style="color:var(--accent-blue)">–</div></div>
+        <div class="card" style="border-top:3px solid var(--online-color)"><div class="card-title">Systems Online</div><div class="card-value" id="s_total_online" style="color:var(--online-color)">–</div></div>
+        <div class="card" style="border-top:3px solid var(--offline-color)"><div class="card-title">Active Outages</div><div class="card-value" id="s_total_offline" style="color:var(--offline-color)">–</div></div>
     </div>
 
     <div class="section-title collapse-head" id="clientToggle" role="button" tabindex="0"
@@ -2436,7 +2403,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
         <span class="section-total-badge">Workstations: <span id="s_total_workstations">–</span> · Servers: <span id="s_total_servers">–</span></span></div>
     <div id="clientCollapsible">
     <div class="client-grid">
-        <div class="card" style="border-left:3px solid var(--accent-blue)"><div class="card-title" style="font-family:var(--sans);font-size:14px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--text-main)">PDA Group</div>
+        <div class="card" style="border-top:3px solid var(--accent-blue)"><div class="card-title" style="font-family:var(--sans);font-size:14px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--text-main)">PDA Group</div>
             <div class="card-value" style="font-size:16px"><span id="s_pda_total">–</span> <span style="font-size:12px;color:var(--text-muted)">Nodes</span></div>
             <div class="card-split-values"><span class="split-stat" style="color:var(--online-color)"><span class="mini-dot on"></span> <span id="s_pda_online">–</span> Online</span>
                 <span class="split-stat" style="color:var(--offline-color)"><span class="mini-dot off"></span> <span id="s_pda_offline">–</span> Outages</span></div>
@@ -2446,7 +2413,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
             <div class="card-fw"><span class="fw-caption"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="7" rx="2"/><rect x="2" y="14" width="20" height="7" rx="2"/><line x1="6" y1="6.5" x2="6.01" y2="6.5"/><line x1="6" y1="17.5" x2="6.01" y2="17.5"/></svg>Servers</span>
                 <span class="split-stat" style="color:var(--online-color)"><span class="mini-dot on"></span> <span id="s_srv_pda_online">–</span> Online</span>
                 <span class="split-stat" style="color:var(--offline-color)"><span class="mini-dot off"></span> <span id="s_srv_pda_offline">–</span> Outages</span></div></div>
-        <div class="card" style="border-left:3px solid var(--accent-purple)"><div class="card-title" style="font-family:var(--sans);font-size:14px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--text-main)">ADMI Group</div>
+        <div class="card" style="border-top:3px solid var(--accent-purple)"><div class="card-title" style="font-family:var(--sans);font-size:14px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--text-main)">ADMI Group</div>
             <div class="card-value" style="font-size:16px"><span id="s_admi_total">–</span> <span style="font-size:12px;color:var(--text-muted)">Nodes</span></div>
             <div class="card-split-values"><span class="split-stat" style="color:var(--online-color)"><span class="mini-dot on"></span> <span id="s_admi_online">–</span> Online</span>
                 <span class="split-stat" style="color:var(--offline-color)"><span class="mini-dot off"></span> <span id="s_admi_offline">–</span> Outages</span></div>
@@ -2456,7 +2423,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
             <div class="card-fw"><span class="fw-caption"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="7" rx="2"/><rect x="2" y="14" width="20" height="7" rx="2"/><line x1="6" y1="6.5" x2="6.01" y2="6.5"/><line x1="6" y1="17.5" x2="6.01" y2="17.5"/></svg>Servers</span>
                 <span class="split-stat" style="color:var(--online-color)"><span class="mini-dot on"></span> <span id="s_srv_admi_online">–</span> Online</span>
                 <span class="split-stat" style="color:var(--offline-color)"><span class="mini-dot off"></span> <span id="s_srv_admi_offline">–</span> Outages</span></div></div>
-        <div class="card" id="unknownCard" style="border-left:3px solid var(--accent-orange);display:none"><div class="card-title" style="font-family:var(--sans);font-size:14px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--accent-orange)"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> UNKNOWN Group</div>
+        <div class="card" id="unknownCard" style="border-top:3px solid var(--accent-orange);display:none"><div class="card-title" style="font-family:var(--sans);font-size:14px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--accent-orange)"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> UNKNOWN Group</div>
             <div class="card-value" style="font-size:16px"><span id="s_unknown_total">–</span> <span style="font-size:12px;color:var(--text-muted)">Nodes</span></div>
             <div class="card-split-values"><span class="split-stat" style="color:var(--online-color)"><span class="mini-dot on"></span> <span id="s_unknown_online">–</span> Online</span>
                 <span class="split-stat" style="color:var(--offline-color)"><span class="mini-dot off"></span> <span id="s_unknown_offline">–</span> Outages</span></div>
@@ -2518,10 +2485,9 @@ th[data-key]:focus-visible{outline-offset:-2px;}
     <section class="mrk" id="net-root">
 <div class="container" id="app">
   <div class="header">
-    <div class="logo"><img src="__LOGO_SRC__" alt="Piccadilly Dental Alliance"></div>
     <div>
       <h1>Meraki MX Dashboard</h1>
-      <div class="subtitle">Piccadilly Dental Alliance · appliance status, speed tests &amp; uplink health</div>
+      <div class="subtitle">Appliance status, speed tests &amp; uplink health</div>
     </div>
     <div class="header-spacer"></div>
     <div id="health-pill" class="health-pill" style="display:none" role="status" aria-live="polite">
@@ -2637,7 +2603,7 @@ function setFilter(f){ filter=f; sessionStorage.setItem('activeQuickFilter',f);
         if(b) b.classList.toggle('active-pill', k===f);
     }); render(); }
 
-function esc(s){ const d=document.createElement('div'); d.textContent=s==null?'':s; return d.innerHTML; }
+function esc(s){ return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function upClass(v){ return v>=99.5?'var(--online-color)':v>=95?'var(--accent-orange)':'var(--offline-color)'; }
 
@@ -2675,13 +2641,19 @@ function render(){
             <td class="time-text" data-label="Last Keep-Alive">${esc(m.last_seen)}</td>
             <td class="uptime-text" data-label="Uptime 24h / 7d"><span style="color:${upClass(m.uptime_24h)}">${m.uptime_24h}%</span> / <span style="color:${upClass(m.uptime_7d)}">${m.uptime_7d}%</span></td>
             <td class="time-text" data-label="Active Outage">${m.status==='Offline'&&m.duration_str!=='--'?'<span class="downtime-active">'+esc(m.duration_str)+'</span>':'<span style="color:var(--text-muted)">--</span>'}</td>
-            <td data-label="Actions"><button class="retire-btn" onclick="retire('${esc(m.system_name).replace(/'/g,"")}')">Retire</button></td>
+            <td data-label="Actions"><button class="retire-btn" data-name="${esc(m.system_name)}" onclick="retire(this.dataset.name)">Retire</button></td>
         </tr>`).join('');
     }
 
     document.querySelectorAll('th[data-key]').forEach(th=>{
         const a=th.querySelector('.arrow');
-        a.textContent = th.dataset.key===sortKey ? (sortDir==='asc'?'▲':'▼') : '';
+        if(th.dataset.key===sortKey){
+            a.textContent = sortDir==='asc'?'▲':'▼';
+            a.setAttribute('aria-label', sortDir==='asc'?'sorted ascending':'sorted descending');
+        }else{
+            a.textContent = '';
+            a.removeAttribute('aria-label');
+        }
     });
 }
 
@@ -2690,6 +2662,18 @@ function applySummary(s){
     document.getElementById('unknownCard').style.display = (s.unknown_total>0 || s.fw_unknown_total>0) ? '' : 'none';
     const sc=document.getElementById('systemsCount');
     if(sc) sc.textContent = (s.total_nodes||0)+' nodes';
+    const offEl=document.getElementById('s_total_offline');
+    if(offEl) offEl.style.color = (s.total_offline||0)>0?'var(--offline-color)':'var(--online-color)';
+    const banner=document.getElementById('outageBanner');
+    if(banner){
+        if((s.total_offline||0)>0){
+            const names=DATA.filter(m=>m.status==='Offline').map(m=>m.practice_name+' / '+m.system_name);
+            banner.innerHTML='<strong>'+s.total_offline+' active outage'+(s.total_offline>1?'s':'')+':</strong> '+esc(names.slice(0,5).join(', '))+(names.length>5?' + '+(names.length-5)+' more':'');
+            banner.hidden=false;
+        }else{
+            banner.hidden=true;
+        }
+    }
 }
 
 // Collapse/expand the System Nodes grid so the Meraki section can sit up top.
@@ -2743,10 +2727,34 @@ async function refresh(){
     }catch(e){ document.getElementById('refreshLabel').textContent='Update failed — retrying…'; }
 }
 
-async function retire(name){
-    if(!confirm('Retire "'+name+'" from monitoring? This removes its history.')) return;
-    await fetch('/api/nodes/'+encodeURIComponent(name), {method:'DELETE', headers:{'X-CSRF-Token':CSRF}});
-    refresh();
+function retire(name){
+    const rows=document.querySelectorAll('#tableBody tr');
+    for(const tr of rows){
+        const btn=tr.querySelector('.retire-btn');
+        if(!btn||btn.dataset.name!==name) continue;
+        if(btn.dataset.confirming==='1'){
+            btn.dataset.confirming='';
+            btn.textContent='Retire';
+            btn.style.cssText='';
+            return;
+        }
+        btn.dataset.confirming='1';
+        btn.textContent='Confirm retire?';
+        btn.style.background='var(--red-soft)';
+        btn.style.color='var(--offline-color)';
+        btn.style.borderColor='var(--red-border)';
+        const cancel=document.createElement('button');
+        cancel.className='retire-btn';
+        cancel.textContent='Cancel';
+        cancel.style.marginLeft='4px';
+        cancel.onclick=function(e){e.stopPropagation();btn.dataset.confirming='';btn.textContent='Retire';btn.style.cssText='';cancel.remove();};
+        btn.parentNode.appendChild(cancel);
+        btn.onclick=async function(){
+            await fetch('/api/nodes/'+encodeURIComponent(name),{method:'DELETE',headers:{'X-CSRF-Token':CSRF}});
+            refresh();
+        };
+        return;
+    }
 }
 
 function applySort(k){
