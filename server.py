@@ -1996,13 +1996,17 @@ tr:hover{background:var(--row-hover);}
 .ip-text{font-family:var(--mono);color:var(--text-muted);font-size:13px;}
 .uptime-text{font-family:var(--mono);font-size:12px;}
 .downtime-active{color:var(--offline-color);font-weight:600;}
+.uptime-warn{color:var(--accent-orange);cursor:help;}
+.uptime-crit{color:var(--offline-color);cursor:help;}
 .retire-btn{background:transparent;border:1px solid var(--border-color);color:var(--text-subtle);font-size:11px;padding:3px 8px;border-radius:4px;cursor:pointer;width:auto;transition:all .15s;}
 .retire-btn:hover{background:var(--red-soft);color:var(--offline-color);border-color:var(--red-border);}
 .notif-btn.notif-off{opacity:.55;}
 .notif-btn.notif-blocked{opacity:.55;cursor:not-allowed;}
 .client-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:28px;}
-.outage-banner{background:var(--red-soft);color:var(--offline-color);border:1px solid var(--red-border);border-radius:10px;padding:12px 18px;margin-bottom:16px;font-size:13px;font-weight:500;line-height:1.5;}
+.outage-banner{background:var(--red-soft);color:var(--offline-color);border:1px solid var(--red-border);border-radius:10px;padding:12px 18px;margin-bottom:16px;font-size:13px;font-weight:500;line-height:1.5;cursor:pointer;transition:background .15s;}
+.outage-banner:hover{background:var(--red-border);}
 .outage-banner strong{font-weight:700;}
+.outage-banner .banner-action{float:right;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;opacity:.7;}
 
 /* ---- Icons, focus, live-region ------------------------------------------ */
 .ico{width:1.05em;height:1.05em;flex:0 0 auto;vertical-align:-2px;stroke-width:2;}
@@ -2295,10 +2299,8 @@ th[data-key]:focus-visible{outline-offset:-2px;}
 
   
   @media (prefers-reduced-motion: reduce) {.mrk *, .mrk *::before, .mrk *::after{
-      animation-duration: 0.001ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.001ms !important;
-    }.mrk .health-pill .beacon{ animation: none; }.mrk .sk-line{ animation: none; background: var(--track); }
+      transition: none !important; animation: none !important; scroll-behavior: auto !important;
+    }.mrk .sk-line{ background: var(--track); }
   }
 
 .mrk .status-badge::before{content:none;}
@@ -2340,7 +2342,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
         <span class="boot-line" id="bl0"><span class="boot-prompt">$</span> initializing pescoe-uptime v2.1...</span>
         <span class="boot-line" id="bl1"><span class="boot-ok">[✓]</span> database connected</span>
         <span class="boot-line" id="bl2"><span class="boot-ok">[✓]</span> loading practice configurations</span>
-        <span class="boot-line" id="bl3"><span class="boot-ok">[✓]</span> 27 practices synchronized</span>
+        <span class="boot-line" id="bl3"><span class="boot-ok">[✓]</span> practices synchronized</span>
         <span class="boot-line" id="bl4"><span class="boot-ok">[✓]</span> meraki api authenticated</span>
         <span class="boot-line" id="bl5"><span class="boot-ok">[✓]</span> heartbeat monitor active</span>
         <span class="boot-line" id="bl6"><span class="boot-ok">[✓]</span> email notifications ready</span>
@@ -2388,7 +2390,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
         </div>
     </header>
 
-    <div id="outageBanner" class="outage-banner" hidden role="alert"></div>
+    <div id="outageBanner" class="outage-banner" hidden role="alert" onclick="showOutages()"></div>
 
     <div class="metrics-grid">
         <div class="card" style="border-top:3px solid var(--accent-blue)"><div class="card-title">Monitored Nodes</div><div class="card-value" id="s_total_nodes" style="color:var(--accent-blue)">–</div></div>
@@ -2486,8 +2488,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
 <div class="container" id="app">
   <div class="header">
     <div>
-      <h1>Meraki MX Dashboard</h1>
-      <div class="subtitle">Appliance status, speed tests &amp; uplink health</div>
+      <h2 style="font-size:18px">Meraki MX</h2>
     </div>
     <div class="header-spacer"></div>
     <div id="health-pill" class="health-pill" style="display:none" role="status" aria-live="polite">
@@ -2606,6 +2607,7 @@ function setFilter(f){ filter=f; sessionStorage.setItem('activeQuickFilter',f);
 function esc(s){ return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function upClass(v){ return v>=99.5?'var(--online-color)':v>=95?'var(--accent-orange)':'var(--offline-color)'; }
+function upLabel(v){ return v>=99.5?'':v>=95?' <span class="uptime-warn" title="Below 99.5% threshold">⚠</span>':' <span class="uptime-crit" title="Below 95% threshold">⚠</span>'; }
 
 function render(){
     const q=(document.getElementById('nodeSearchInput').value||'').trim().toLowerCase();
@@ -2639,7 +2641,7 @@ function render(){
             <td class="ip-text" data-label="Public IP">${esc(m.ip_address)}</td>
             <td data-label="Status"><span class="status-badge ${m.status==='Online'?'online':'offline'}">${esc(m.status)}</span></td>
             <td class="time-text" data-label="Last Keep-Alive">${esc(m.last_seen)}</td>
-            <td class="uptime-text" data-label="Uptime 24h / 7d"><span style="color:${upClass(m.uptime_24h)}">${m.uptime_24h}%</span> / <span style="color:${upClass(m.uptime_7d)}">${m.uptime_7d}%</span></td>
+            <td class="uptime-text" data-label="Uptime 24h / 7d"><span style="color:${upClass(m.uptime_24h)}">${m.uptime_24h}%${upLabel(m.uptime_24h)}</span> / <span style="color:${upClass(m.uptime_7d)}">${m.uptime_7d}%${upLabel(m.uptime_7d)}</span></td>
             <td class="time-text" data-label="Active Outage">${m.status==='Offline'&&m.duration_str!=='--'?'<span class="downtime-active">'+esc(m.duration_str)+'</span>':'<span style="color:var(--text-muted)">--</span>'}</td>
             <td data-label="Actions"><button class="retire-btn" data-name="${esc(m.system_name)}" onclick="retire(this.dataset.name)">Retire</button></td>
         </tr>`).join('');
@@ -2668,7 +2670,7 @@ function applySummary(s){
     if(banner){
         if((s.total_offline||0)>0){
             const names=DATA.filter(m=>m.status==='Offline').map(m=>m.practice_name+' / '+m.system_name);
-            banner.innerHTML='<strong>'+s.total_offline+' active outage'+(s.total_offline>1?'s':'')+':</strong> '+esc(names.slice(0,5).join(', '))+(names.length>5?' + '+(names.length-5)+' more':'');
+            banner.innerHTML='<span class="banner-action">View all ▸</span><strong>'+s.total_offline+' active outage'+(s.total_offline>1?'s':'')+':</strong> '+esc(names.slice(0,5).join(', '))+(names.length>5?' + '+(names.length-5)+' more':'');
             banner.hidden=false;
         }else{
             banner.hidden=true;
@@ -2693,6 +2695,13 @@ function toggleSystems(){
     try{ localStorage.setItem('systemsCollapsed', collapsed?'1':'0'); }catch(e){}
 }
 
+function showOutages(){
+    setSystemsCollapsed(false);
+    try{localStorage.setItem('systemsCollapsed','0');}catch(e){}
+    setFilter('outages');
+    document.getElementById('systemsToggle').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
 // Generic collapse for the Client/Server summary sections. The total badge in
 // the header stays visible while collapsed, so the at-a-glance count is kept.
 function setSection(name, collapsed){
@@ -2714,17 +2723,24 @@ function initSection(name, defCollapsed){
     setSection(name, v===null ? defCollapsed : v==='1');
 }
 
+let refreshFails=0;
 async function refresh(){
+    if(document.hidden) return;
     try{
         const r = await fetch('/api/status', {headers:{'Accept':'application/json'}});
         if(r.status===401){ location.href='/login'; return; }
         const j = await r.json();
         DATA = j.machines;
+        refreshFails=0;
         diffAndNotify(DATA);
         applySummary(j.summary); render();
         document.getElementById('refreshLabel').textContent =
             'Live · updated '+new Date().toLocaleTimeString()+' · IST';
-    }catch(e){ document.getElementById('refreshLabel').textContent='Update failed — retrying…'; }
+    }catch(e){
+        refreshFails++;
+        const wait=Math.min(refreshFails*30,300);
+        document.getElementById('refreshLabel').textContent='Update failed — retry in '+wait+'s';
+    }
 }
 
 function retire(name){
@@ -2739,10 +2755,12 @@ function retire(name){
             return;
         }
         btn.dataset.confirming='1';
-        btn.textContent='Confirm retire?';
+        btn.innerHTML='Confirm retire?<br><span style="font-size:10px;font-weight:400;opacity:.8">Permanently removes from monitoring</span>';
         btn.style.background='var(--red-soft)';
         btn.style.color='var(--offline-color)';
         btn.style.borderColor='var(--red-border)';
+        btn.style.whiteSpace='normal';
+        btn.style.lineHeight='1.3';
         const cancel=document.createElement('button');
         cancel.className='retire-btn';
         cancel.textContent='Cancel';
@@ -3000,7 +3018,8 @@ function diffAndNotify(rows){
     initSection('meraki', false);  // Meraki section defaults expanded
     setFilter(filter);
     refresh();
-    setInterval(refresh, 30000);   // live poll every 30s
+    setInterval(function(){if(!document.hidden)refresh();}, 30000);
+    document.addEventListener('visibilitychange',function(){if(!document.hidden){refreshFails=0;refresh();}});
 })();
 </script>
 <script>
