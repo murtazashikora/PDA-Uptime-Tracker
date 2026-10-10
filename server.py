@@ -1907,7 +1907,7 @@ DASHBOARD_TEMPLATE = r"""
 <link rel="icon" type="image/png" href="/icon-192.png">
 <style>
 :root{--bg-color:#f6f8fb;--card-bg:#ffffff;--th-bg:#f1f4f8;--text-main:#1a2332;--text-system-name:#1a2332;
---text-muted:#64748b;--text-subtle:#94a3b8;--border-color:#e8edf3;--border-strong:#cbd5e1;
+--text-muted:#64748b;--text-subtle:#6b7a8d;--border-color:#e8edf3;--border-strong:#cbd5e1;
 --online-color:#059669;--offline-color:#dc2626;
 --accent-blue:#0066cc;--accent-purple:#7c3aed;--accent-orange:#d97706;--row-hover:#f8fafd;
 --btn-bg:#ffffff;--btn-hover:#f1f5f9;--search-bg:#ffffff;--search-border:#e8edf3;
@@ -1919,7 +1919,7 @@ DASHBOARD_TEMPLATE = r"""
 --body:'Source Sans 3',-apple-system,'Segoe UI',sans-serif;
 --mono:'Fira Code',ui-monospace,'Cascadia Code',Consolas,monospace;}
 [data-theme=dark]{--bg-color:#0c1220;--card-bg:#162032;--th-bg:#1a2a3e;--text-main:#edf2f7;
---text-system-name:#edf2f7;--text-muted:#8896a8;--text-subtle:#5a6a7e;--border-color:#233045;--border-strong:#334155;
+--text-system-name:#edf2f7;--text-muted:#8896a8;--text-subtle:#8896a8;--border-color:#233045;--border-strong:#334155;
 --online-color:#34d399;--offline-color:#f87171;
 --accent-blue:#4d9fff;--accent-purple:#a78bfa;--accent-orange:#fbbf24;--row-hover:#1a2a3e;
 --btn-bg:#162032;--btn-hover:#1e2d42;--search-bg:#162032;--search-border:#233045;
@@ -1985,7 +1985,7 @@ tr:hover{background:var(--row-hover);}
 .business-group{font-weight:600;color:var(--accent-blue);font-size:13px;}
 .practice-name{font-weight:600;color:var(--text-main);font-size:14px;}
 .system-name{font-size:14px;font-weight:600;color:var(--text-system-name);display:flex;align-items:center;gap:6px;}
-.server-tag{background:var(--accent-blue);background:rgba(0,102,204,0.08);color:var(--accent-blue);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px;}
+.server-tag{background:rgba(0,102,204,0.08);color:var(--accent-blue);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px;}
 .status-badge{font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;display:inline-flex;align-items:center;gap:5px;text-transform:uppercase;letter-spacing:.3px;}
 .status-badge::before{content:"";width:6px;height:6px;border-radius:50%;display:inline-block;}
 .online{background:var(--green-soft);color:var(--online-color);border:1px solid var(--green-border);}
@@ -2007,6 +2007,7 @@ tr:hover{background:var(--row-hover);}
 .outage-banner:hover{background:var(--red-border);}
 .outage-banner strong{font-weight:700;}
 .outage-banner .banner-action{float:right;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;opacity:.7;}
+.outage-banner-btn{all:unset;display:block;width:100%;cursor:pointer;text-align:left;color:inherit;font:inherit;}
 
 /* ---- Icons, focus, live-region ------------------------------------------ */
 .ico{width:1.05em;height:1.05em;flex:0 0 auto;vertical-align:-2px;stroke-width:2;}
@@ -2156,12 +2157,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
     box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
     animation: pulse 2.2s ease-out infinite;
   }.mrk .health-pill.warn .beacon{ background: var(--yellow); animation: none; }.mrk .health-pill.crit .beacon{ background: var(--red); animation: none; }
-  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-  @keyframes pulse {
-    0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55); }
-    70%  { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-  }.mrk .glass{
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}.mrk .glass{
     background: var(--card);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius);
@@ -2291,9 +2287,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
     border: 2px solid var(--track); border-top-color: var(--accent);
     border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
 
-  
   @media (max-width: 640px) {.mrk{ padding: var(--space-4) var(--space-3); }.mrk .device-grid, .mrk .uplink-grid{ grid-template-columns: 1fr; }.mrk .btn, .mrk .btn-sm{ min-height: 44px; }.mrk .health-pill{ width: 100%; justify-content: center; }
   }
 
@@ -2390,7 +2384,7 @@ th[data-key]:focus-visible{outline-offset:-2px;}
         </div>
     </header>
 
-    <div id="outageBanner" class="outage-banner" hidden role="alert" onclick="showOutages()"></div>
+    <div id="outageBanner" class="outage-banner" hidden role="alert"><button id="outageBannerBtn" class="outage-banner-btn" onclick="showOutages()" aria-label="View active outages"></button></div>
 
     <div class="metrics-grid">
         <div class="card" style="border-top:3px solid var(--accent-blue)"><div class="card-title">Monitored Nodes</div><div class="card-value" id="s_total_nodes" style="color:var(--accent-blue)">–</div></div>
@@ -2448,7 +2442,8 @@ th[data-key]:focus-visible{outline-offset:-2px;}
     <div class="controls-wrapper">
         <div class="search-container"><span class="search-icon"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
             <input type="text" id="nodeSearchInput" class="search-input" aria-label="Search systems by name, practice, IP, or group"
-                   placeholder="Search name / practice / IP / group…" oninput="render()"></div>
+                   placeholder="Search name / practice / IP / group…" oninput="render();document.getElementById('searchClear').hidden=!this.value">
+            <button id="searchClear" hidden onclick="document.getElementById('nodeSearchInput').value='';this.hidden=true;render()" aria-label="Clear search" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px 6px;line-height:1">×</button></div>
         <div class="filter-buttons-group">
             <button id="btnFilterAll" class="filter-pill active-pill" onclick="setFilter('all')">Show All</button>
             <button id="btnFilterWorkstations" class="filter-pill" onclick="setFilter('workstations')">Workstations Only</button>
@@ -2577,12 +2572,6 @@ th[data-key]:focus-visible{outline-offset:-2px;}
 
     <div id="device-list" class="device-grid" aria-busy="false"></div>
 
-    <div class="glass footer">
-      <strong>API endpoints used</strong><br>
-      <code>GET /organizations/{orgId}/devices/statuses?productTypes[]=appliance</code> — device status<br>
-      <code>POST /devices/{serial}/liveTools/throughputTest</code> — device-to-cloud speed test<br>
-      <code>GET /organizations/{orgId}/devices/uplinks/lossAndLatency</code> — uplink health
-    </div>
   </div>
 </div>
     </section>
@@ -2607,9 +2596,10 @@ function setFilter(f){ filter=f; sessionStorage.setItem('activeQuickFilter',f);
 function esc(s){ return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function upClass(v){ return v>=99.5?'var(--online-color)':v>=95?'var(--accent-orange)':'var(--offline-color)'; }
-function upLabel(v){ return v>=99.5?'':v>=95?' <span class="uptime-warn" title="Below 99.5% threshold">⚠</span>':' <span class="uptime-crit" title="Below 95% threshold">⚠</span>'; }
+function upLabel(v){ return v>=99.5?'':v>=95?' <span class="uptime-warn" role="img" aria-label="Below 99.5% threshold" title="Below 99.5% threshold">⚠</span>':' <span class="uptime-crit" role="img" aria-label="Below 95% threshold" title="Below 95% threshold">⚠</span>'; }
 
 function render(){
+    if(retireTarget) return;
     const q=(document.getElementById('nodeSearchInput').value||'').trim().toLowerCase();
     sessionStorage.setItem('activeSearchQuery', document.getElementById('nodeSearchInput').value);
 
@@ -2632,6 +2622,8 @@ function render(){
     });
 
     const body=document.getElementById('tableBody');
+    const sc=document.getElementById('systemsCount');
+    if(sc) sc.textContent=rows.length+' of '+DATA.length+' nodes';
     if(rows.length===0){ body.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px">No matching system nodes found.</td></tr>'; }
     else {
         body.innerHTML = rows.map(m=>`<tr>
@@ -2642,7 +2634,7 @@ function render(){
             <td data-label="Status"><span class="status-badge ${m.status==='Online'?'online':'offline'}">${esc(m.status)}</span></td>
             <td class="time-text" data-label="Last Keep-Alive">${esc(m.last_seen)}</td>
             <td class="uptime-text" data-label="Uptime 24h / 7d"><span style="color:${upClass(m.uptime_24h)}">${m.uptime_24h}%${upLabel(m.uptime_24h)}</span> / <span style="color:${upClass(m.uptime_7d)}">${m.uptime_7d}%${upLabel(m.uptime_7d)}</span></td>
-            <td class="time-text" data-label="Active Outage">${m.status==='Offline'&&m.duration_str!=='--'?'<span class="downtime-active">'+esc(m.duration_str)+'</span>':'<span style="color:var(--text-muted)">--</span>'}</td>
+            <td class="time-text" data-label="Outage">${m.status==='Offline'&&m.duration_str!=='--'?'<span class="downtime-active">'+esc(m.duration_str)+'</span>':'<span style="color:var(--text-muted)">--</span>'}</td>
             <td data-label="Actions"><button class="retire-btn" data-name="${esc(m.system_name)}" onclick="retire(this.dataset.name)">Retire</button></td>
         </tr>`).join('');
     }
@@ -2652,28 +2644,36 @@ function render(){
         if(th.dataset.key===sortKey){
             a.textContent = sortDir==='asc'?'▲':'▼';
             a.setAttribute('aria-label', sortDir==='asc'?'sorted ascending':'sorted descending');
+            th.setAttribute('aria-sort', sortDir==='asc'?'ascending':'descending');
         }else{
             a.textContent = '';
             a.removeAttribute('aria-label');
+            th.removeAttribute('aria-sort');
         }
+    });
+    document.querySelectorAll('.filter-pill').forEach(b=>{
+        b.setAttribute('aria-pressed', b.classList.contains('active-pill')?'true':'false');
     });
 }
 
 function applySummary(s){
     for(const k in s){ const el=document.getElementById('s_'+k); if(el) el.textContent=s[k]; }
     document.getElementById('unknownCard').style.display = (s.unknown_total>0 || s.fw_unknown_total>0) ? '' : 'none';
-    const sc=document.getElementById('systemsCount');
-    if(sc) sc.textContent = (s.total_nodes||0)+' nodes';
     const offEl=document.getElementById('s_total_offline');
     if(offEl) offEl.style.color = (s.total_offline||0)>0?'var(--offline-color)':'var(--online-color)';
     const banner=document.getElementById('outageBanner');
+    const bannerBtn=document.getElementById('outageBannerBtn');
+    const offCount=s.total_offline||0;
     if(banner){
-        if((s.total_offline||0)>0){
+        if(offCount>0){
             const names=DATA.filter(m=>m.status==='Offline').map(m=>m.practice_name+' / '+m.system_name);
-            banner.innerHTML='<span class="banner-action">View all ▸</span><strong>'+s.total_offline+' active outage'+(s.total_offline>1?'s':'')+':</strong> '+esc(names.slice(0,5).join(', '))+(names.length>5?' + '+(names.length-5)+' more':'');
+            bannerBtn.innerHTML='<span class="banner-action">View all ▸</span><strong>'+offCount+' active outage'+(offCount>1?'s':'')+':</strong> '+esc(names.slice(0,5).join(', '))+(names.length>5?' + '+(names.length-5)+' more':'');
             banner.hidden=false;
+            document.title='('+offCount+') Outages — PESCOE Systems Dashboard';
+            setSection('client', false);
         }else{
             banner.hidden=true;
+            document.title='PESCOE Systems Dashboard';
         }
     }
 }
@@ -2734,26 +2734,34 @@ async function refresh(){
         refreshFails=0;
         diffAndNotify(DATA);
         applySummary(j.summary); render();
+        const ind=document.getElementById('refreshInd');
+        ind.style.background='';ind.style.borderColor='';ind.style.color='';
+        const dot=ind.querySelector('.live-dot');if(dot)dot.style.background='';
         document.getElementById('refreshLabel').textContent =
-            'Live · updated '+new Date().toLocaleTimeString()+' · IST';
+            'Live · updated '+new Date().toLocaleTimeString();
     }catch(e){
         refreshFails++;
         const wait=Math.min(refreshFails*30,300);
-        document.getElementById('refreshLabel').textContent='Update failed — retry in '+wait+'s';
+        const ind=document.getElementById('refreshInd');
+        ind.style.background='var(--red-soft)';ind.style.borderColor='var(--red-border)';ind.style.color='var(--offline-color)';
+        const dot=ind.querySelector('.live-dot');if(dot)dot.style.background='var(--offline-color)';
+        document.getElementById('refreshLabel').innerHTML='Update failed <button onclick="refresh();event.stopPropagation()" style="all:unset;cursor:pointer;text-decoration:underline;font-weight:600">Retry</button>';
     }
 }
 
+let retireTarget=null;
 function retire(name){
     const rows=document.querySelectorAll('#tableBody tr');
     for(const tr of rows){
         const btn=tr.querySelector('.retire-btn');
         if(!btn||btn.dataset.name!==name) continue;
         if(btn.dataset.confirming==='1'){
-            btn.dataset.confirming='';
+            btn.dataset.confirming='';retireTarget=null;
             btn.textContent='Retire';
             btn.style.cssText='';
             return;
         }
+        retireTarget=name;
         btn.dataset.confirming='1';
         btn.innerHTML='Confirm retire?<br><span style="font-size:10px;font-weight:400;opacity:.8">Permanently removes from monitoring</span>';
         btn.style.background='var(--red-soft)';
@@ -2765,10 +2773,15 @@ function retire(name){
         cancel.className='retire-btn';
         cancel.textContent='Cancel';
         cancel.style.marginLeft='4px';
-        cancel.onclick=function(e){e.stopPropagation();btn.dataset.confirming='';btn.textContent='Retire';btn.style.cssText='';cancel.remove();};
+        cancel.onclick=function(e){e.stopPropagation();btn.dataset.confirming='';retireTarget=null;btn.textContent='Retire';btn.style.cssText='';cancel.remove();};
         btn.parentNode.appendChild(cancel);
         btn.onclick=async function(){
-            await fetch('/api/nodes/'+encodeURIComponent(name),{method:'DELETE',headers:{'X-CSRF-Token':CSRF}});
+            try{
+                const r=await fetch('/api/nodes/'+encodeURIComponent(name),{method:'DELETE',headers:{'X-CSRF-Token':CSRF}});
+                if(!r.ok){showToast('Retire failed — server returned '+r.status);return;}
+                showToast(name+' retired successfully');
+            }catch(e){showToast('Retire failed — network error');}
+            retireTarget=null;
             refresh();
         };
         return;
@@ -2795,7 +2808,7 @@ function toggleTheme(){
     if(nt==='dark') document.documentElement.setAttribute('data-theme','dark');
     else document.documentElement.removeAttribute('data-theme');
     localStorage.setItem('theme',nt);
-    document.getElementById('themeLabel').textContent = nt==='dark'?'Light Theme':'Dark Theme';
+    document.getElementById('themeLabel').textContent = nt==='dark'?'Dark Theme':'Light Theme';
 }
 
 // --- Notifications: Web Push (mobile/background) + in-tab fallback ---------
@@ -2998,7 +3011,7 @@ function diffAndNotify(rows){
 
 (async function init(){
     document.getElementById('themeLabel').textContent =
-        (localStorage.getItem('theme')||'light')==='dark'?'Light Theme':'Dark Theme';
+        (localStorage.getItem('theme')||'light')==='dark'?'Dark Theme':'Light Theme';
     updateNotifBtn();
     // Skip service-worker / push registration in the embedded split view so it
     // doesn't compete with the standalone tab for the SW controller.
@@ -3010,7 +3023,7 @@ function diffAndNotify(rows){
             try{ await subscribePush(); }catch(e){ console.warn(e); }
         }
     }
-    const sq=sessionStorage.getItem('activeSearchQuery'); if(sq) document.getElementById('nodeSearchInput').value=sq;
+    const sq=sessionStorage.getItem('activeSearchQuery'); if(sq){document.getElementById('nodeSearchInput').value=sq;document.getElementById('searchClear').hidden=!sq;}
     let _sysCol=null; try{ _sysCol=localStorage.getItem('systemsCollapsed'); }catch(e){}
     setSystemsCollapsed(_sysCol===null ? true : _sysCol==='1');   // default collapsed
     initSection('client', true);   // Summary defaults collapsed; the total
@@ -3223,19 +3236,22 @@ function showSkeletons() {
 
 async function loadDevices() {
   if (!devices.length) showSkeletons();
-  const res = await fetch('/meraki/api/devices');
-  const data = await res.json();
-  devices = data.devices || [];
-  speedResults = data.speed_results || {};
-  renderSummary();
-  renderDevices();
-  updateRefreshLabel(data.last_refresh);
-  document.getElementById('device-list').setAttribute('aria-busy', 'false');
-  // If any card's uplink panel is open, refresh the cached uplink data too.
-  if (Object.values(uplinkOpen).some(Boolean)) { await loadCardUplink(); renderDevices(); }
-  // Nudge the Uptime summary so the per-group firewall counts pick up the
-  // latest Meraki status without waiting for the next 30s poll.
-  if (typeof refresh === 'function') { try { refresh(); } catch (e) {} }
+  try{
+    const res = await fetch('/meraki/api/devices');
+    const data = await res.json();
+    devices = data.devices || [];
+    speedResults = data.speed_results || {};
+    renderSummary();
+    renderDevices();
+    updateRefreshLabel(data.last_refresh);
+    document.getElementById('device-list').setAttribute('aria-busy', 'false');
+    if (Object.values(uplinkOpen).some(Boolean)) { await loadCardUplink(); renderDevices(); }
+    if (typeof refresh === 'function') { try { refresh(); } catch (e) {} }
+  }catch(e){
+    const list=document.getElementById('device-list');
+    list.setAttribute('aria-busy','false');
+    list.innerHTML='<div class="glass empty-state" style="grid-column:1/-1"><h3>Failed to load devices</h3><p>'+esc(e.message)+'</p><button class="btn btn-primary btn-sm" onclick="loadDevices()">Retry</button></div>';
+  }
 }
 
 async function refreshDevices() {
@@ -3390,14 +3406,20 @@ function renderDevices() {
 
 /* ── Speed / throughput tests ── */
 function pollUntilDone(serial) {
+  if(pollTimers[serial]) clearInterval(pollTimers[serial]);
+  let attempts=0;
   pollTimers[serial] = setInterval(async () => {
-    const r = await fetch('/meraki/api/speed-test/' + encodeURIComponent(serial));
-    const result = await r.json();
-    if (result.status === 'complete' || result.status === 'timeout') {
-      clearInterval(pollTimers[serial]);
-      speedResults[serial] = result;
-      renderDevices();
-    }
+    attempts++;
+    if(attempts>30){clearInterval(pollTimers[serial]);speedResults[serial]={status:'timeout'};renderDevices();return;}
+    try{
+      const r = await fetch('/meraki/api/speed-test/' + encodeURIComponent(serial));
+      const result = await r.json();
+      if (result.status === 'complete' || result.status === 'timeout') {
+        clearInterval(pollTimers[serial]);
+        speedResults[serial] = result;
+        renderDevices();
+      }
+    }catch(e){clearInterval(pollTimers[serial]);speedResults[serial]={status:'timeout'};renderDevices();}
   }, 4000);
 }
 
